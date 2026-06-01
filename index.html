@@ -177,6 +177,23 @@
   .floatbar button.turbo{background:var(--gold-d)} .floatbar button.turbo:hover{background:var(--gold)}
   .toast{position:fixed;bottom:24px;right:24px;opacity:0;transform:translateY(14px);z-index:30;background:var(--ink);color:#fff;font-weight:700;padding:11px 18px;border-radius:10px;transition:.3s var(--ease);pointer-events:none;max-width:360px}
   .toast.show{opacity:1;transform:none}
+  .modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:oklch(18% 0.02 265/.6);backdrop-filter:blur(3px)}
+  .modal.show{display:flex;animation:fade .25s var(--ease)}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal-card{position:relative;width:min(420px,100%);background:var(--card);border-radius:20px;padding:26px 24px 24px;text-align:center;box-shadow:0 30px 70px -20px oklch(20% 0.04 265/.6);animation:pop .3s var(--ease)}
+  @keyframes pop{from{transform:translateY(16px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+  .modal-x{all:unset;cursor:pointer;position:absolute;top:12px;right:14px;font-size:1.5rem;line-height:1;color:var(--ink-3);padding:4px 8px;border-radius:8px}
+  .modal-x:active,.modal-x:hover{background:var(--gold-bg);color:var(--ink)}
+  .modal-rocco{width:190px;height:190px;object-fit:contain;margin:4px auto 6px;display:block;filter:drop-shadow(0 10px 18px oklch(30% 0.05 60/.35));animation:bob 4s var(--ease) infinite}
+  .modal-card h3{font-family:var(--serif);font-size:1.4rem;margin:6px 0 4px}
+  .modal-card p{color:var(--ink-2);font-size:.9rem;margin:0 0 16px}
+  .share-url{display:flex;gap:8px;margin-bottom:12px}
+  .share-url input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font-family:var(--mono);font-size:.82rem;color:var(--ink-2);background:var(--bg)}
+  .share-url button,.share-native{all:unset;cursor:pointer;font-weight:700;border-radius:10px;transition:.15s}
+  .share-url button{background:var(--gold-d);color:#fff;padding:11px 16px;font-size:.86rem;flex:none}
+  .share-url button:active,.share-url button:hover{filter:brightness(1.08)}
+  .share-native{display:block;width:100%;text-align:center;background:var(--ink);color:#fff;padding:13px;font-size:.95rem}
+  .share-native:active,.share-native:hover{background:var(--gold-d)}
   @media(max-width:980px){
     .app{grid-template-columns:1fr}
     /* sidebar becomes a slide-in drawer */
@@ -297,7 +314,7 @@
           <div class="setsec">⚡ Turbo — real AI rewrite</div>
           <p class="d" style="font-size:.78rem;color:var(--ink-3);margin:0 0 8px">On by default. Add your API key below and the Butler sends your prompt to Claude to expand it into something genuinely detailed. Your key is stored only in this browser (localStorage) and sent directly to Anthropic.</p>
           <div class="setrow"><div><label>Enable Turbo</label></div>
-            <label class="switch"><input type="checkbox" data-set="turbo" checked><span class="sl"></span></label></div>
+            <label class="switch"><input type="checkbox" data-set="turbo"><span class="sl"></span></label></div>
           <div class="setfull"><label>Anthropic API key</label><div class="d">Get one at console.anthropic.com → API Keys</div><input type="password" data-set="apiKey" placeholder="sk-ant-…"></div>
           <div class="setfull" style="border-bottom:none"><label>Claude model id</label><div class="d">e.g. claude-3-5-sonnet-latest · or your preferred model</div><input type="text" data-set="apiModel" placeholder="claude-3-5-sonnet-latest"></div>
         </div>
@@ -318,6 +335,16 @@
   <button class="turbo" id="turboBtn" style="display:none">⚡ Turbo polish</button>
 </div>
 <div class="toast" id="toast">Copied</div>
+<div class="modal" id="shareModal">
+  <div class="modal-card">
+    <button class="modal-x" id="shareClose" aria-label="Close">×</button>
+    <img src="rocco.png" class="modal-rocco" alt="Rocco the raccoon butler">
+    <h3>Share Prompt Butler</h3>
+    <p>Send Rocco to a friend — it's free and runs right in the browser.</p>
+    <div class="share-url"><input id="shareUrl" readonly value="https://dustin24snyder-bit.github.io/prompt-butler/"><button id="copyLink">📋 Copy</button></div>
+    <button class="share-native" id="shareNative">Share…</button>
+  </div>
+</div>
 <input type="file" id="fileInput" multiple accept="image/*,.txt,.md,.markdown,.csv,.json,.log,.html,.css,.js,.ts,.py,.yml,.yaml,.xml" style="display:none">
 
 <script>
@@ -509,6 +536,19 @@ const CATALOG=[
   {id:"/fewer-permission-prompts",cat:"agent",why:"Reduce permission prompts",kw:["permission prompts","allowlist","fewer prompts"]},
   {id:"/pm2",cat:"agent",why:"Generate PM2 service commands",kw:["pm2","process manager"]},
   {id:"/claude-api",cat:"backend",why:"Build/optimize Claude API apps",kw:["claude api","anthropic sdk","prompt caching"]},
+  // ── ECC Operator (agent engineering) ──
+  {id:"/ecc-operator:agentic-engineering",cat:"agent",why:"Design agentic systems",kw:["agentic engineering","agent system","build an agent","agent design"]},
+  {id:"/ecc-operator:agent-harness-construction",cat:"agent",why:"Construct an agent harness",kw:["agent harness","harness construction","agent loop harness"]},
+  {id:"/ecc-operator:agent-architecture-audit",cat:"agent",why:"Audit an agent architecture",kw:["agent audit","agent architecture audit","review my agent"]},
+  {id:"/ecc-operator:eval-harness",cat:"agent",why:"Build an evaluation harness",kw:["eval harness","evaluation harness","agent evals","benchmark agent"]},
+  {id:"/ecc-operator:verification-loop",cat:"agent",why:"Verification loop for agents",kw:["verification loop","verify agent output","self-check loop"]},
+  {id:"/ecc-operator:autonomous-loops",cat:"agent",why:"Safe autonomous agent loops",kw:["autonomous loop","self-running agent","continuous agent"]},
+  {id:"/ecc-operator:token-budget-advisor",cat:"agent",why:"Advise on token/context budget",kw:["token budget","context budget","context window cost"]},
+  {id:"/ecc-operator:continuous-learning-v2",cat:"agent",why:"Continuous learning for agents",kw:["continuous learning","agent learning","instinct learning"]},
+  {id:"/ecc-operator:council",cat:"agent",why:"Multi-agent council / debate",kw:["council","multi-agent debate","panel of agents","agent debate"]},
+  {id:"/ecc-operator:iterative-retrieval",cat:"agent",why:"Iterative retrieval (RAG) loop",kw:["iterative retrieval","retrieval loop","rag loop"]},
+  {id:"/ecc-operator:strategic-compact",cat:"agent",why:"Strategic context compaction",kw:["compact context","strategic compaction","summarize context"]},
+  {id:"/ecc-operator:blueprint",cat:"agent",why:"Agent system blueprint",kw:["agent blueprint","system blueprint","agent plan"]},
 ];
 const COMPANIONS={design:["/ui-styling","/verify"],backend:["/code-review","/verify"],build:["/verify"],review:["/verify"]};
 const PRIORITY={Critical:0,High:1,Mid:2};
@@ -900,7 +940,7 @@ function mdToHtml(t){
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],ce=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
 const state={mode:"detailed",task:"",cats:[],comp:new Set(),skills:[],answers:{},context:{background:"",audience:"",constraints:"",examples:""},
-  settings:{target:"Any",format:"detailed",length:"Auto",showSkills:true,appendSkills:false,turbo:true,apiKey:"",apiModel:"claude-3-5-sonnet-latest"},
+  settings:{target:"Any",format:"detailed",length:"Auto",showSkills:true,appendSkills:false,turbo:false,apiKey:"",apiModel:"claude-3-5-sonnet-latest"},
   versions:[],current:null,qlist:[],busy:false,attachments:[]};
 const EXAMPLES=["Write a cold email a busy CEO will actually answer","Design a landing page that converts for my SaaS","Midjourney prompt for a cozy cabin in falling snow","Plan a user-notifications feature (email + in-app)","Research the best CRM for a 10-person startup","Turn my messy notes into a polished investor update"];
 
@@ -1048,7 +1088,16 @@ $("#newBtn").onclick=()=>{
   $("#workspace").classList.remove("show");$("#floatbar").style.display="none";$("#landing").style.display="flex";
   $("#task").value="";$("#task").focus();$("#crumbTitle").textContent="New Prompt";closeDrawer();
 };
-$("#shareBtn").onclick=()=>navigator.clipboard.writeText($("#copyBtn").dataset.raw||"").then(()=>toast("Prompt copied to share"));
+/* ── Share the app (Rocco popup) ── */
+const SHARE_URL="https://dustin24snyder-bit.github.io/prompt-butler/";
+function openShare(){$("#shareModal").classList.add("show");$("#shareNative").style.display=navigator.share?"block":"none";}
+function closeShare(){$("#shareModal").classList.remove("show");}
+$("#shareBtn").onclick=openShare;
+$("#shareClose").onclick=closeShare;
+$("#shareModal").onclick=e=>{if(e.target.id==="shareModal")closeShare();};
+$("#copyLink").onclick=()=>navigator.clipboard.writeText(SHARE_URL).then(()=>toast("Link copied 🦝"));
+$("#shareNative").onclick=()=>{if(navigator.share)navigator.share({title:"Prompt Butler 🦝",text:"Turn rough ideas into prize-winning prompts for ChatGPT, Claude & Gemini.",url:SHARE_URL}).catch(()=>{});};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeShare();});
 $("#saveBtn").onclick=saveCurrent;
 $("#libBtn").onclick=()=>{switchTab("versions");setMP("inputs");closeDrawer();toast("Saved prompts are in Recent");};
 
