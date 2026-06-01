@@ -165,8 +165,20 @@
   .sendpop button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;padding:11px 10px;border-radius:9px;font-weight:700;font-size:.9rem;color:var(--ink)}
   .sendpop button:hover,.sendpop button:active{background:var(--gold-bg)}
   .sendpop .ic{width:22px;height:22px;flex:none;display:grid;place-items:center;border-radius:6px;font-size:.8rem;color:#fff}
-  .sendpop .ic.gpt{background:#10a37f}.sendpop .ic.cla{background:#d97757}.sendpop .ic.gem{background:#4285f4}
+  .ic.gpt{background:#10a37f}.ic.cla{background:#d97757}.ic.gem{background:#4285f4}
   .sendpop .sp-note{font-size:.7rem;color:var(--ink-3);padding:6px 9px 3px;line-height:1.35}
+  .sendpop button.pref{box-shadow:inset 0 0 0 2px var(--gold)}
+  .sendpop button.pref::after{content:"last used";margin-left:auto;font-size:.6rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--gold-d);background:var(--gold-bg);padding:2px 7px;border-radius:999px}
+  /* landing quick-send */
+  .quicksend{margin-top:16px;text-align:center}
+  .qs-label{font-size:.78rem;color:var(--ink-3);font-weight:600}
+  .qs-tools{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+  .qs-tools button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:.85rem;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:10px 15px;transition:.15s}
+  .qs-tools button:hover,.qs-tools button:active{border-color:var(--gold);color:var(--gold-d)}
+  .qs-tools button.pref{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+  .qs-tools button.pref::after{content:"★";color:var(--gold-d);margin-left:2px}
+  .qs-tools .ic{width:16px;height:16px;flex:none;border-radius:5px}
+  .sendpop .ic{display:grid;place-items:center}
   .prompthdr .pl{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
   .copybtn{all:unset;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--gold-d);display:inline-flex;gap:5px;align-items:center;padding:5px 9px;border-radius:7px;transition:.15s}
   .copybtn:hover{background:var(--gold-bg)}
@@ -268,6 +280,14 @@
         <div class="attachrow"><button class="attachbtn" id="attachLanding" type="button">📎 Attach files or images</button></div>
         <div class="attachchips" id="attachChipsLanding"></div>
         <button class="giddy" id="giddy">Upgrade Prompt&nbsp;→</button>
+        <div class="quicksend">
+          <span class="qs-label">…or upgrade &amp; send straight to</span>
+          <div class="qs-tools">
+            <button data-qs="chatgpt"><span class="ic gpt"></span>ChatGPT</button>
+            <button data-qs="claude"><span class="ic cla"></span>Claude</button>
+            <button data-qs="gemini"><span class="ic gem"></span>Gemini</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1064,25 +1084,41 @@ $("#giddy").onclick=start;
 $("#task").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")start();});
 $("#improveBtn").onclick=()=>{regenerate();setMP("prompt");toast("Refined with your answers");$("#prose").scrollIntoView({behavior:"smooth",block:"center"});};
 $("#turboBtn").onclick=()=>{setMP("prompt");turboGenerate();};
-/* ── Copy → then offer to open in ChatGPT / Claude / Gemini ── */
-function copyPrompt(){
-  const t=$("#copyBtn").dataset.raw||"";
+/* ── Copy / send to ChatGPT · Claude · Gemini (remembers preferred tool) ── */
+function copyText(t){
   try{ if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t); }catch(e){}
   try{ const ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");document.body.removeChild(ta);return Promise.resolve(); }catch(e){ return Promise.reject(e); }
 }
+function copyPrompt(){return copyText($("#copyBtn").dataset.raw||"");}
+function getPref(){try{return localStorage.getItem("pb_tool")||"";}catch(e){return "";}}
+function setPref(t){try{localStorage.setItem("pb_tool",t);}catch(e){}}
+function markPref(){
+  const p=getPref();
+  $$("#sendPop button[data-tool]").forEach(b=>b.classList.toggle("pref",b.dataset.tool===p));
+  if(p){const b=document.querySelector('#sendPop button[data-tool="'+p+'"]'),t=document.querySelector('#sendPop .sp-t');if(b&&t)t.insertAdjacentElement("afterend",b);}
+  $$(".qs-tools button[data-qs]").forEach(b=>b.classList.toggle("pref",b.dataset.qs===p));
+}
+function toolUrl(tool,text){const enc=encodeURIComponent(text||"");return tool==="chatgpt"?"https://chatgpt.com/?q="+enc:tool==="claude"?"https://claude.ai/new?q="+enc:"https://gemini.google.com/app";}
+function openInTool(tool){
+  const text=$("#copyBtn").dataset.raw||"";
+  setPref(tool);markPref();
+  window.open(toolUrl(tool,text),"_blank","noopener"); // sync within gesture → not popup-blocked
+  copyText(text);                                       // copy as fallback if URL prefill is too long
+}
 $("#copyBtn").onclick=()=>{
   if(!($("#copyBtn").dataset.raw||"").trim())return;
-  $("#sendPop").classList.add("show");
+  markPref();$("#sendPop").classList.add("show");
   copyPrompt().then(()=>toast("Copied, sir"),()=>toast("Open it in your AI of choice"));
 };
-$$("#sendPop button[data-tool]").forEach(b=>b.onclick=e=>{
-  e.stopPropagation();
-  const enc=encodeURIComponent($("#copyBtn").dataset.raw||"");
-  const urls={chatgpt:"https://chatgpt.com/?q="+enc, claude:"https://claude.ai/new?q="+enc, gemini:"https://gemini.google.com/app"};
-  copyPrompt().finally(()=>window.open(urls[b.dataset.tool],"_blank","noopener"));
-  $("#sendPop").classList.remove("show");
-});
+$$("#sendPop button[data-tool]").forEach(b=>b.onclick=e=>{e.stopPropagation();openInTool(b.dataset.tool);$("#sendPop").classList.remove("show");});
 document.addEventListener("click",e=>{if($("#sendPop").classList.contains("show")&&!e.target.closest(".prompthdr"))$("#sendPop").classList.remove("show");});
+/* landing quick-send: upgrade the prompt, then fire it into the chosen AI */
+$$(".qs-tools button[data-qs]").forEach(b=>b.onclick=()=>{
+  if(!$("#task").value.trim()){toast("Write a prompt first, if you please");return;}
+  start();
+  openInTool(b.dataset.qs);
+});
+markPref();
 /* mobile: slide-in drawer + Inputs/Prompt pane toggle */
 function closeDrawer(){$(".app").classList.remove("drawer");}
 $("#hamburger").onclick=()=>$(".app").classList.toggle("drawer");
