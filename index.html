@@ -13,6 +13,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Prompt Butler">
 <link rel="apple-touch-icon" href="icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Prompt Butler">
+<meta property="og:title" content="Prompt Butler 🦝 — turn rough ideas into prize-winning prompts">
+<meta property="og:description" content="Hand Rocco a rough idea; get an exhaustively detailed prompt for ChatGPT, Claude & Gemini. Free, runs in your browser.">
+<meta property="og:url" content="https://dustin24snyder-bit.github.io/prompt-butler/">
+<meta property="og:image" content="https://dustin24snyder-bit.github.io/prompt-butler/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Prompt Butler 🦝">
+<meta name="twitter:description" content="Turn rough ideas into prize-winning prompts for ChatGPT, Claude & Gemini.">
+<meta name="twitter:image" content="https://dustin24snyder-bit.github.io/prompt-butler/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
@@ -355,6 +367,148 @@ const CATALOG=[
   {id:"/multi-workflow",cat:"automation",why:"research→plan→execute→optimize→review",kw:["full workflow","end to end","multi model"]},
   {id:"/hookify",cat:"agent",why:"Create behavior-prevention hooks",kw:["hook","prevent","always do","never do","auto run"]},
   {id:"/update-config",cat:"agent",why:"settings.json: permissions, env, hooks",kw:["permission","settings","allow command","env var","config"]},
+  // ── Planning / PRP ──
+  {id:"/plan-prd",cat:"plan",why:"Lean problem-first PRD",kw:["prd","product requirements","problem statement"]},
+  {id:"/prp-prd",cat:"plan",why:"Interactive hypothesis-driven PRD",kw:["interactive prd","hypothesis","product spec interactive"]},
+  {id:"/prp-implement",cat:"plan",why:"Execute a plan with validation loops",kw:["execute plan","implement plan","validation loop"]},
+  {id:"/feature-dev",cat:"plan",why:"Guided feature build with architecture focus",kw:["feature development","build a feature","guided feature"]},
+  {id:"/multi-plan",cat:"plan",why:"Multi-model implementation plan",kw:["multi-model plan","planning perspectives"]},
+  // ── Language build / review / test ──
+  {id:"/cpp-build",cat:"build",why:"Fix C++ / CMake / linker errors",kw:["c++ build","cmake","linker"]},
+  {id:"/cpp-review",cat:"review",why:"C++ memory safety + modern idioms",kw:["c++ review","cpp review","memory safety"]},
+  {id:"/cpp-test",cat:"test",why:"C++ TDD with GoogleTest",kw:["c++ test","googletest","gtest"]},
+  {id:"/go-review",cat:"review",why:"Go idioms, concurrency, errors",kw:["go review","golang review","goroutine"]},
+  {id:"/go-test",cat:"test",why:"Go table-driven TDD",kw:["go test","golang test","table-driven"]},
+  {id:"/rust-review",cat:"review",why:"Rust ownership, lifetimes, unsafe",kw:["rust review","ownership","lifetime","borrow"]},
+  {id:"/rust-test",cat:"test",why:"Rust TDD + coverage",kw:["rust test","cargo test"]},
+  {id:"/kotlin-build",cat:"build",why:"Fix Kotlin / Gradle build",kw:["kotlin build","gradle kotlin"]},
+  {id:"/kotlin-review",cat:"review",why:"Kotlin idioms, null + coroutine safety",kw:["kotlin review","coroutine","null safety"]},
+  {id:"/kotlin-test",cat:"test",why:"Kotlin TDD with Kotest",kw:["kotlin test","kotest"]},
+  {id:"/flutter-build",cat:"build",why:"Fix Dart analyzer + Flutter build",kw:["flutter build","dart analyze"]},
+  {id:"/flutter-review",cat:"review",why:"Flutter widgets + state management",kw:["flutter review","widget review","dart review"]},
+  {id:"/flutter-test",cat:"test",why:"Flutter unit/widget/golden tests",kw:["flutter test","widget test","golden test"]},
+  {id:"/react-review",cat:"review",why:"React hooks, render perf, a11y, RSC",kw:["react review","jsx review","tsx review"]},
+  {id:"/react-test",cat:"test",why:"React Testing Library TDD",kw:["react test","rtl","component test"]},
+  {id:"/python-review",cat:"review",why:"PEP8, typing, security, idioms",kw:["python review","pep8","pythonic"]},
+  {id:"/fastapi-review",cat:"review",why:"FastAPI async, DI, Pydantic, security",kw:["fastapi review","review fastapi","pydantic"]},
+  {id:"/gradle-build",cat:"build",why:"Fix Gradle build (Android/KMP)",kw:["gradle build","android build","kmp"]},
+  // ── Review / quality / security ──
+  {id:"/review",cat:"review",why:"Review a pull request",kw:["pull request","pr review","review pr"]},
+  {id:"/quality-gate",cat:"review",why:"Full ECC quality pipeline",kw:["quality gate","quality pipeline"]},
+  {id:"/security-scan",cat:"review",why:"AgentShield scan: hooks, MCP, secrets",kw:["agentshield","secret scan","security scan"]},
+  {id:"/simplify",cat:"review",why:"Reuse / simplification cleanups",kw:["simplify","tidy","clean up code"]},
+  {id:"/codebase-cleanup:tech-debt",cat:"review",why:"Inventory + remediate tech debt",kw:["tech debt","technical debt","remediation"]},
+  {id:"/codebase-cleanup:refactor-clean",cat:"review",why:"SOLID refactor for cleanliness",kw:["refactor","solid","clean code"]},
+  {id:"/wshobson-extras:full-review",cat:"review",why:"Multi-dimensional code review",kw:["full review","comprehensive review","multi-dimension review"]},
+  // ── Run / verify ──
+  {id:"/run",cat:"test",why:"Launch the app to see a change live",kw:["run the app","start app","launch app","screenshot app"]},
+  // ── Multi-model / automation ──
+  {id:"/multi-frontend",cat:"design",why:"Frontend multi-model workflow",kw:["multi frontend","frontend workflow"]},
+  {id:"/model-route",cat:"automation",why:"Recommend the best model tier",kw:["which model","model tier","model selection"]},
+  {id:"/santa-loop",cat:"automation",why:"Adversarial dual-review until both approve",kw:["dual review","adversarial review","convergence loop"]},
+  {id:"/gan-build",cat:"automation",why:"Generator/evaluator build loop",kw:["gan build","generator evaluator","scored build"]},
+  {id:"/gan-design",cat:"design",why:"Generator/evaluator design loop",kw:["gan design","scored design","visual loop"]},
+  {id:"/wshobson-extras:team-spawn",cat:"automation",why:"Spawn a parallel agent team",kw:["agent team","spawn team","parallel agents","fan out"]},
+  {id:"/wshobson-extras:team-feature",cat:"automation",why:"Parallel feature build by a team",kw:["parallel feature","team feature"]},
+  {id:"/wshobson-extras:team-debug",cat:"automation",why:"Parallel hypothesis debugging",kw:["team debug","parallel debug","hypotheses"]},
+  // ── Docs / writing ──
+  {id:"/anthropic-skills:doc-coauthoring",cat:"docs",why:"Structured doc co-writing",kw:["co-author","write a doc","spec","proposal","decision doc"]},
+  {id:"/anthropic-skills:internal-comms",cat:"docs",why:"Status reports, leadership updates, FAQs",kw:["status report","leadership update","internal comms","newsletter","incident report"]},
+  {id:"/anthropic-skills:contract-reviewer",cat:"business",why:"Flag risks before you sign",kw:["should i sign","lease review","review this agreement"]},
+  {id:"/anthropic-skills:learning-path-generator",cat:"docs",why:"Structured learning plan",kw:["learning path","study plan","curriculum","teach me","roadmap to learn"]},
+  {id:"/anthropic-skills:difficult-conversation-prep",cat:"docs",why:"Prep a tough conversation",kw:["difficult conversation","tough talk","negotiate","confrontation"]},
+  {id:"/update-codemaps",cat:"docs",why:"Generate architecture codemaps",kw:["codemap","architecture map","code structure"]},
+  {id:"/jira",cat:"business",why:"Get/update a Jira ticket",kw:["jira","ticket","backlog","sprint ticket"]},
+  {id:"/pdf-viewer:fill-form",cat:"docs",why:"Fill a PDF form",kw:["fill pdf","pdf form","form field"]},
+  {id:"/pdf-viewer:sign",cat:"docs",why:"Sign a PDF",kw:["sign pdf","signature","initials"]},
+  {id:"/pdf-viewer:annotate",cat:"docs",why:"Annotate a PDF",kw:["annotate pdf","markup pdf","comment pdf"]},
+  // ── Creative / visual ──
+  {id:"/anthropic-skills:canvas-design",cat:"design",why:"Poster / static art (PNG/PDF)",kw:["poster","static art","print design","canvas art"]},
+  {id:"/anthropic-skills:algorithmic-art",cat:"design",why:"Generative art with p5.js",kw:["generative art","algorithmic art","flow field","particle system"]},
+  {id:"/anthropic-skills:explainer-graphic",cat:"design",why:"Infographic with analogies",kw:["infographic","explainer graphic","diagram"]},
+  {id:"/anthropic-skills:slide-deck-builder",cat:"design",why:"Visual slide decks with components",kw:["slide deck","deck builder","presentation deck"]},
+  {id:"/anthropic-skills:web-artifacts-builder",cat:"design",why:"Rich self-contained web artifacts",kw:["web artifact","interactive page","html artifact"]},
+  {id:"/anthropic-skills:animated-website",cat:"design",why:"Scroll-animated luxury site",kw:["animated website","scroll animation","parallax"]},
+  // ── Data ──
+  {id:"/data:analyze",cat:"data",why:"Analyze a dataset",kw:["analyze data","data analysis","insights from data"]},
+  {id:"/data:create-viz",cat:"data",why:"Create a visualization",kw:["chart","visualization","plot","graph data"]},
+  {id:"/data:sql-queries",cat:"data",why:"Write / optimize SQL",kw:["sql query","optimize query","join","group by"]},
+  {id:"/data:validate-data",cat:"data",why:"Validate / clean data",kw:["validate data","data quality","clean data"]},
+  {id:"/anthropic-skills:analyzing-financial-statements",cat:"business",why:"Financial ratios + metrics",kw:["financial statement","financial ratio","balance sheet","income statement"]},
+  {id:"/anthropic-skills:creating-financial-models",cat:"business",why:"DCF, sensitivity, Monte Carlo",kw:["financial model","dcf","valuation model","monte carlo"]},
+  // ── Research ──
+  {id:"/enterprise-search:search",cat:"research",why:"Search across connected tools",kw:["search our","internal search","find document","across tools"]},
+  {id:"/enterprise-search:knowledge-synthesis",cat:"research",why:"Synthesize across sources",kw:["synthesize","knowledge synthesis","combine sources"]},
+  {id:"/anthropic-skills:morning-briefing",cat:"research",why:"Daily industry scan",kw:["morning briefing","daily scan","industry news"]},
+  {id:"/bio-research:single-cell-rna-qc",cat:"research",why:"Single-cell RNA QC",kw:["single cell","rna qc","scrna"]},
+  {id:"/bio-research:nextflow-development",cat:"research",why:"Nextflow pipeline development",kw:["nextflow","bioinformatics pipeline"]},
+  // ── Sales ──
+  {id:"/sales:account-research",cat:"business",why:"Research a target account",kw:["account research","company research","prospect research"]},
+  {id:"/sales:call-prep",cat:"business",why:"Prep for a sales call",kw:["call prep","sales call prep","meeting prep sales"]},
+  {id:"/sales:call-summary",cat:"business",why:"Summarize a sales call",kw:["call summary","recap call"]},
+  {id:"/sales:competitive-intelligence",cat:"business",why:"Competitive intel",kw:["competitive intelligence","competitor analysis","battlecard"]},
+  {id:"/sales:pipeline-review",cat:"business",why:"Review the sales pipeline",kw:["pipeline review","deal review","sales pipeline"]},
+  {id:"/sales:forecast",cat:"business",why:"Sales forecast",kw:["sales forecast","revenue forecast","quota"]},
+  {id:"/apollo:prospect",cat:"business",why:"Find prospects (Apollo)",kw:["find prospects","lead list","apollo prospect"]},
+  {id:"/apollo:enrich-lead",cat:"business",why:"Enrich a lead (Apollo)",kw:["enrich lead","lead data","contact enrichment"]},
+  // ── Marketing ──
+  {id:"/marketing:campaign-plan",cat:"docs",why:"Plan a marketing campaign",kw:["campaign plan","marketing campaign","go-to-market"]},
+  {id:"/marketing:content-creation",cat:"docs",why:"Create marketing content",kw:["marketing content","blog post","social post","ad copy"]},
+  {id:"/marketing:email-sequence",cat:"docs",why:"Email nurture sequence",kw:["email sequence","drip campaign","nurture emails"]},
+  {id:"/marketing:seo-audit",cat:"docs",why:"SEO audit",kw:["seo audit","keyword research","meta tags seo"]},
+  {id:"/marketing:competitive-brief",cat:"docs",why:"Competitive brief",kw:["competitive brief","market positioning"]},
+  // ── Finance ──
+  {id:"/finance:financial-statements",cat:"business",why:"Prepare financial statements",kw:["financial statements","p&l","balance sheet prep"]},
+  {id:"/finance:variance-analysis",cat:"business",why:"Budget vs actual variance",kw:["variance analysis","budget vs actual","variance"]},
+  {id:"/finance:journal-entry",cat:"business",why:"Create / review journal entries",kw:["journal entry","accounting entry","debit credit"]},
+  {id:"/finance:close-management",cat:"business",why:"Month-end close",kw:["month-end close","close process","period close"]},
+  {id:"/finance:audit-support",cat:"business",why:"Audit support / PBC",kw:["audit support","audit prep"]},
+  {id:"/finance:sox-testing",cat:"business",why:"SOX controls testing",kw:["sox","controls testing","compliance controls"]},
+  // ── Legal ──
+  {id:"/legal:compliance-check",cat:"business",why:"Compliance check",kw:["compliance check","regulatory","gdpr","hipaa"]},
+  {id:"/legal:legal-risk-assessment",cat:"business",why:"Legal risk assessment",kw:["legal risk","liability"]},
+  {id:"/legal:vendor-check",cat:"business",why:"Vendor / MSA review",kw:["vendor check","msa","vendor agreement"]},
+  {id:"/legal:brief",cat:"business",why:"Legal brief / memo",kw:["legal brief","legal memo","case brief"]},
+  // ── HR ──
+  {id:"/human-resources:interview-prep",cat:"business",why:"Interview prep / questions",kw:["interview prep","interview questions","candidate eval"]},
+  {id:"/human-resources:onboarding",cat:"business",why:"Onboarding plan",kw:["onboarding","new hire plan","30-60-90"]},
+  {id:"/human-resources:comp-analysis",cat:"business",why:"Compensation analysis",kw:["comp analysis","compensation","salary band","pay equity"]},
+  {id:"/human-resources:performance-review",cat:"business",why:"Performance review",kw:["performance review","appraisal"]},
+  {id:"/human-resources:policy-lookup",cat:"business",why:"HR policy lookup",kw:["hr policy","policy lookup","handbook"]},
+  // ── Customer support ──
+  {id:"/customer-support:draft-response",cat:"business",why:"Draft a support reply",kw:["support reply","customer response","help desk reply"]},
+  {id:"/customer-support:customer-escalation",cat:"business",why:"Handle an escalation",kw:["escalation","angry customer","escalate"]},
+  {id:"/customer-support:kb-article",cat:"business",why:"Write a KB article",kw:["kb article","knowledge base","help article"]},
+  // ── Operations ──
+  {id:"/operations:runbook",cat:"business",why:"Operational runbook",kw:["runbook","ops procedure","standard operating procedure","sop"]},
+  {id:"/operations:process-doc",cat:"business",why:"Document a process",kw:["process doc","document a process","workflow doc"]},
+  {id:"/operations:risk-assessment",cat:"business",why:"Risk assessment",kw:["risk assessment","risk matrix","risk register"]},
+  {id:"/operations:status-report",cat:"business",why:"Operational status report",kw:["ops report","weekly ops update"]},
+  {id:"/operations:change-request",cat:"business",why:"Change request",kw:["change request","rfc","change management"]},
+  // ── Engineering bundle ──
+  {id:"/engineering:architecture",cat:"plan",why:"Software architecture design",kw:["architecture","system architecture","design the system"]},
+  {id:"/engineering:system-design",cat:"plan",why:"System design",kw:["system design","scalability design","high-level design"]},
+  {id:"/engineering:debug",cat:"review",why:"Debug an issue",kw:["debug","stack trace","not working","throwing error"]},
+  {id:"/engineering:incident-response",cat:"business",why:"Incident response",kw:["incident","outage","postmortem","sev1"]},
+  {id:"/engineering:deploy-checklist",cat:"plan",why:"Deployment checklist",kw:["deploy checklist","release checklist","go-live"]},
+  {id:"/engineering:testing-strategy",cat:"test",why:"Testing strategy",kw:["testing strategy","test plan","qa strategy"]},
+  {id:"/engineering:documentation",cat:"docs",why:"Engineering documentation",kw:["technical docs","engineering docs","api docs"]},
+  // ── Design bundle ──
+  {id:"/ui-design:create-component",cat:"design",why:"Guided component creation",kw:["create component","build component","new component"]},
+  {id:"/ui-design:design-review",cat:"design",why:"Review existing UI",kw:["design review","ui review","critique ui"]},
+  {id:"/ui-design:accessibility-audit",cat:"design",why:"WCAG accessibility audit",kw:["accessibility audit","wcag","a11y audit","screen reader"]},
+  {id:"/design:user-research",cat:"design",why:"Plan / synthesize user research",kw:["user research","usability","interview users"]},
+  {id:"/design:ux-copy",cat:"docs",why:"UX microcopy",kw:["ux copy","microcopy","button text","error message copy"]},
+  {id:"/design:design-critique",cat:"design",why:"Critique a design",kw:["design critique","critique design"]},
+  // ── Agent / meta / sessions ──
+  {id:"/learn-eval",cat:"agent",why:"Extract + save reusable patterns",kw:["save pattern","learn this","reusable skill"]},
+  {id:"/skill-create",cat:"agent",why:"Generate a SKILL.md from git history",kw:["create skill","skill.md","make a skill"]},
+  {id:"/anthropic-skills:mcp-builder",cat:"agent",why:"Build an MCP server",kw:["mcp server","model context protocol","build mcp"]},
+  {id:"/anthropic-skills:skill-creator",cat:"agent",why:"Author a new skill",kw:["author skill","skill creator"]},
+  {id:"/save-session",cat:"agent",why:"Save session state to resume later",kw:["save session","resume later"]},
+  {id:"/fewer-permission-prompts",cat:"agent",why:"Reduce permission prompts",kw:["permission prompts","allowlist","fewer prompts"]},
+  {id:"/pm2",cat:"agent",why:"Generate PM2 service commands",kw:["pm2","process manager"]},
+  {id:"/claude-api",cat:"backend",why:"Build/optimize Claude API apps",kw:["claude api","anthropic sdk","prompt caching"]},
 ];
 const COMPANIONS={design:["/ui-styling","/verify"],backend:["/code-review","/verify"],build:["/verify"],review:["/verify"]};
 const PRIORITY={Critical:0,High:1,Mid:2};
