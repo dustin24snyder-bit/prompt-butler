@@ -1,0 +1,31 @@
+<svg class="coon" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rocco the raccoon">
+<defs><linearGradient id="rfur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e949d"/><stop offset="1" stop-color="#646a73"/></linearGradient></defs>
+<path d="M15 30 C7 11 28 11 29 28 Z" fill="#6b7079"/>
+<path d="M65 30 C73 11 52 11 51 28 Z" fill="#6b7079"/>
+<path d="M20 27 C16 16 28 17 27 26 Z" fill="#2c2f34"/>
+<path d="M60 27 C64 16 52 17 53 26 Z" fill="#2c2f34"/>
+<ellipse cx="40" cy="42" rx="25" ry="22" fill="url(#rfur)"/>
+<path d="M40 30 C57 31 55 57 40 59 C25 57 23 31 40 30 Z" fill="#f1ecdd"/>
+<ellipse cx="29.5" cy="39" rx="11.5" ry="9" fill="#2b2e33"/>
+<ellipse cx="50.5" cy="39" rx="11.5" ry="9" fill="#2b2e33"/>
+<path d="M34 37 Q40 33 46 37 Q44 48 40 49 Q36 48 34 37 Z" fill="#2b2e33"/>
+<ellipse cx="29" cy="31.4" rx="6.6" ry="2.6" fill="#f1ecdd"/>
+<ellipse cx="51" cy="31.4" rx="6.6" ry="2.6" fill="#f1ecdd"/>
+<ellipse cx="31" cy="39" rx="5.3" ry="5.9" fill="#fff"/>
+<ellipse cx="49" cy="39" rx="5.3" ry="5.9" fill="#fff"/>
+<circle cx="32.2" cy="40" r="3.4" fill="#6f4b2a"/>
+<circle cx="47.8" cy="40" r="3.4" fill="#6f4b2a"/>
+<circle cx="32.4" cy="40.4" r="1.8" fill="#1d1a17"/>
+<circle cx="47.6" cy="40.4" r="1.8" fill="#1d1a17"/>
+<circle cx="33.5" cy="38.5" r="1.2" fill="#fff"/>
+<circle cx="48.9" cy="38.5" r="1.2" fill="#fff"/>
+<ellipse cx="24.5" cy="49" rx="3.3" ry="2.1" fill="#e79a72" opacity=".5"/>
+<ellipse cx="55.5" cy="49" rx="3.3" ry="2.1" fill="#e79a72" opacity=".5"/>
+<path d="M40 45 Q44.6 45 43.6 49 Q42.6 52.2 40 52.2 Q37.4 52.2 36.4 49 Q35.4 45 40 45 Z" fill="#23262b"/>
+<path d="M40 52.2 L40 55" stroke="#23262b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M33 55 Q40 64 47 55 Q40 60 33 55 Z" fill="#7a2f36"/>
+<path d="M37 56.6 Q40 60.5 43 56.6 Q40 59 37 56.6 Z" fill="#e98a90"/>
+<path d="M40 67 L30 61.5 L30 72.5 Z" fill="#c2913a"/>
+<path d="M40 67 L50 61.5 L50 72.5 Z" fill="#c2913a"/>
+<circle cx="40" cy="67" r="3.1" fill="#a87f28"/>
+</svg>

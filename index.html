@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Prompt Butler — allow me to refine that, sir</title>
+<link rel="icon" type="image/svg+xml" href="mascot.svg">
+<meta name="description" content="Prompt Butler — turn rough ideas into exhaustively detailed prompts for ChatGPT, Claude & Gemini.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2b2e33">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prompt Butler">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:oklch(96.5% 0.008 85); --bg-grad:oklch(93% 0.02 80); --side:oklch(98.5% 0.005 85);
+    --card:#fff; --line:oklch(90% 0.008 80); --line-2:oklch(84% 0.012 75);
+    --ink:oklch(26% 0.012 265); --ink-2:oklch(44% 0.012 265); --ink-3:oklch(62% 0.01 265);
+    --gold:oklch(64% 0.11 80); --gold-d:oklch(54% 0.11 78); --gold-bg:oklch(95% 0.035 85);
+    --crit:oklch(57% 0.18 28); --crit-bg:oklch(95% 0.05 30);
+    --high:oklch(64% 0.14 55); --high-bg:oklch(95% 0.06 65);
+    --mid:oklch(60% 0.1 90); --mid-bg:oklch(96% 0.06 95);
+    --green:oklch(52% 0.1 155);
+    --serif:"Playfair Display",Georgia,serif; --sans:"DM Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    --r:14px; --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{font-family:var(--sans);color:var(--ink);background:
+    radial-gradient(120% 60% at 100% 100%, var(--bg-grad), transparent 55%),
+    radial-gradient(90% 50% at 0% 0%, oklch(95% 0.02 90), transparent 50%), var(--bg);
+    min-height:100vh;font-size:15px;line-height:1.5}
+  button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .app{display:grid;grid-template-columns:248px 1fr;min-height:100vh;min-height:100dvh}
+  aside{background:var(--side);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:6px}
+  .logo{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-weight:800;font-size:1.18rem;color:var(--ink);padding:4px 6px 14px}
+  .logo .ic{width:38px;height:38px;flex:none;overflow:hidden;border-radius:10px;box-shadow:0 2px 6px -2px oklch(30% 0.05 60/.4)}
+  .roccologo{width:100%;height:100%;object-fit:cover;object-position:50% 16%;display:block}
+  .mascot{margin:0 auto 10px;height:180px;display:flex;justify-content:center;animation:bob 4.5s var(--ease) infinite}
+  .roccoimg{height:180px;width:auto;border-radius:22px;display:block;box-shadow:0 18px 34px -14px oklch(28% 0.06 60/.5)}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+  .navbtn{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;font-weight:600;font-size:.9rem;color:var(--ink-2);transition:.15s}
+  .navbtn:hover{background:var(--gold-bg);color:var(--gold-d)}
+  .navbtn.primary{background:var(--ink);color:#fff} .navbtn.primary:hover{background:var(--gold-d);color:#fff}
+  .navsec{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:14px 11px 6px}
+  .savedlist{display:flex;flex-direction:column;gap:2px;overflow:auto;max-height:34vh}
+  .saveditem{all:unset;cursor:pointer;font-size:.84rem;color:var(--ink-2);padding:7px 11px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.15s}
+  .saveditem:hover{background:var(--gold-bg);color:var(--gold-d)}
+  aside .foot{margin-top:auto;font-size:.72rem;color:var(--ink-3);padding:10px 6px;font-family:var(--mono)}
+  main{display:flex;flex-direction:column;min-width:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 26px;border-bottom:1px solid var(--line);padding-top:max(15px,env(safe-area-inset-top))}
+  .hamburger{display:none;all:unset;cursor:pointer;font-size:1.3rem;line-height:1;color:var(--ink);padding:6px 8px;border-radius:8px;margin-right:2px}
+  .hamburger:active{background:var(--gold-bg)}
+  .backdrop{display:none}
+  .mtoggle{display:none}
+  .crumb{font-size:.86rem;color:var(--ink-3);display:flex;gap:7px;align-items:center;min-width:0}
+  .crumb b{color:var(--ink);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topact{display:flex;gap:8px;align-items:center}
+  .turbopill{display:none;font-size:.72rem;font-weight:800;letter-spacing:.04em;color:var(--gold-d);background:var(--gold-bg);border:1px solid var(--gold);padding:5px 10px;border-radius:999px}
+  .turbopill.on{display:inline-block}
+  .tbtn{all:unset;cursor:pointer;font-weight:700;font-size:.82rem;padding:9px 15px;border-radius:9px;transition:.15s}
+  .tbtn.ghost{border:1px solid var(--line-2);color:var(--ink-2)} .tbtn.ghost:hover{border-color:var(--gold);color:var(--gold-d)}
+  .tbtn.solid{background:var(--ink);color:#fff} .tbtn.solid:hover{background:var(--gold-d)}
+  .landing{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px}
+  .landing h1{font-family:var(--serif);font-size:clamp(2rem,1rem+3.6vw,3.3rem);margin:0 0 10px;letter-spacing:-.01em;font-style:italic}
+  .landing h1 .em{color:var(--gold-d);font-style:normal}
+  .landing p.sub{color:var(--ink-2);font-size:1.08rem;max-width:48ch;margin:0 0 26px}
+  .entry{width:min(700px,92vw)}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line-2);border-radius:11px;padding:4px;gap:3px;margin-bottom:14px}
+  .seg button{all:unset;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--ink-2);padding:8px 16px;border-radius:8px;transition:.18s}
+  .seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+  .entry textarea{width:100%;min-height:120px;resize:vertical;border:2px solid var(--line-2);border-radius:13px;padding:15px;font-family:var(--sans);font-size:1.06rem;background:#fff;color:var(--ink);transition:.2s}
+  .entry textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 4px oklch(64% 0.11 80/.16)}
+  .examples{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .chip-ex{cursor:pointer;font-size:.78rem;font-weight:600;color:var(--gold-d);background:var(--gold-bg);border:1px dashed var(--gold);padding:6px 11px;border-radius:8px;transition:.16s}
+  .chip-ex:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .giddy{all:unset;cursor:pointer;font-family:var(--serif);font-weight:800;font-size:1.12rem;color:var(--gold);background:var(--ink);padding:14px 40px;border-radius:13px;box-shadow:0 5px 0 oklch(18% 0.01 265);transition:.12s var(--ease);margin-top:6px}
+  .giddy:hover{transform:translateY(-2px);box-shadow:0 7px 0 oklch(18% 0.01 265)} .giddy:active{transform:translateY(3px);box-shadow:0 2px 0 oklch(18% 0.01 265)}
+  .workspace{flex:1;display:none;grid-template-columns:minmax(350px,470px) 1fr;gap:20px;padding:22px 26px 90px;align-items:start;min-width:0}
+  .workspace.show{display:grid}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 18px 40px -30px oklch(40% 0.03 265/.4)}
+  .tabs{display:flex;gap:2px;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tabs button{all:unset;cursor:pointer;font-weight:700;font-size:.84rem;color:var(--ink-3);padding:8px 13px;border-radius:8px;transition:.15s}
+  .tabs button[aria-selected=true]{background:var(--gold-bg);color:var(--gold-d)}
+  .tabpane{display:none;padding:18px} .tabpane.active{display:block}
+  .lazylbl{font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+  #lazy{width:100%;min-height:56px;resize:vertical;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:var(--bg)}
+  #lazy:focus{outline:none;border-color:var(--gold)}
+  .improvehdr{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}
+  .improvehdr .t{font-family:var(--serif);font-weight:700;font-size:1.02rem}
+  .improvehdr .ct{font-size:.8rem;font-weight:700;color:var(--gold-d);background:var(--gold-bg);padding:3px 9px;border-radius:999px}
+  .inputtoggle{display:flex;align-items:center;gap:11px;margin-top:12px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--gold-bg)}
+  .inputtoggle .itl{font-size:.84rem;font-weight:700;color:var(--ink)} .inputtoggle .d{font-size:.74rem;color:var(--ink-3);font-weight:400;margin-top:2px}
+  .attachrow{display:flex;justify-content:center;margin:10px 0 4px}
+  .attachbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:.84rem;color:var(--gold-d);background:var(--gold-bg);border:1px dashed var(--gold);padding:10px 15px;border-radius:10px}
+  .attachbtn:active,.attachbtn:hover{background:var(--gold);color:#fff}
+  .attachchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+  .entry .attachchips{justify-content:center}
+  .attchip{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:9px;padding:5px 8px;max-width:210px}
+  .attchip img{width:24px;height:24px;border-radius:5px;object-fit:cover;flex:none}
+  .attchip .fi{font-size:.95rem}
+  .attchip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .attchip .rm{cursor:pointer;color:var(--ink-3);font-weight:800;padding:0 2px;flex:none}
+  .attchip .rm:active,.attchip .rm:hover{color:var(--crit)}
+  .qcard{border:1px solid var(--line);border-radius:11px;padding:13px 14px;margin-bottom:10px;transition:.15s var(--ease);cursor:pointer;background:#fff}
+  .qcard:hover{border-color:var(--line-2);box-shadow:0 6px 16px -12px oklch(40% 0.03 265/.5)}
+  .qcard.answered{border-color:var(--green);background:oklch(98% 0.015 155/.6)}
+  .badge{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:3px 8px;border-radius:6px;margin-bottom:8px}
+  .badge.Critical{color:var(--crit);background:var(--crit-bg)} .badge.High{color:var(--high);background:var(--high-bg)} .badge.Mid{color:oklch(48% 0.1 90);background:var(--mid-bg)}
+  .qcard .qq{font-weight:700;font-size:.94rem;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .qcard .qq .chev{color:var(--ink-3);transition:.2s} .qcard.open .qq .chev{transform:rotate(90deg)}
+  .qcard .qwhy{font-size:.82rem;color:var(--ink-3);margin-top:5px;line-height:1.45}
+  .qcard .answerbox{display:none;margin-top:11px} .qcard.open .answerbox{display:block}
+  .qopts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .qopt{cursor:pointer;font-size:.82rem;padding:7px 11px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);transition:.14s}
+  .qopt:hover{border-color:var(--gold)} .qopt[aria-pressed=true]{background:var(--ink);color:#fff;border-color:transparent;font-weight:700}
+  .qopt.rec::after{content:" ★";color:var(--high)} .qopt[aria-pressed=true].rec::after{color:var(--gold)}
+  .qfree{width:100%;border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:.86rem;background:#fff;color:var(--ink)}
+  .qfree:focus{outline:none;border-color:var(--gold)}
+  .ctxfield{margin-bottom:14px} .ctxfield label{display:block;font-size:.78rem;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+  .ctxfield textarea,.ctxfield input,.setrow select,.setrow input{width:100%;border:1px solid var(--line-2);border-radius:9px;padding:9px 11px;font-family:var(--sans);font-size:.88rem;background:#fff;color:var(--ink);resize:vertical}
+  .ctxfield textarea:focus,.ctxfield input:focus,.setrow select:focus,.setrow input:focus{outline:none;border-color:var(--gold)}
+  .setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .setrow label{font-size:.86rem;font-weight:700;color:var(--ink-2)} .setrow .d{font-size:.76rem;color:var(--ink-3);font-weight:400}
+  .setrow select{width:auto;min-width:150px}
+  .setsec{font-family:var(--serif);font-weight:700;font-size:.96rem;margin:16px 0 4px;display:flex;align-items:center;gap:7px}
+  .setfull{padding:10px 0;border-bottom:1px dashed var(--line)} .setfull label{display:block;font-size:.82rem;font-weight:700;color:var(--ink-2);margin-bottom:5px} .setfull .d{font-size:.74rem;color:var(--ink-3);font-weight:400;margin-bottom:6px}
+  .switch{position:relative;width:42px;height:24px;flex:none} .switch input{opacity:0;width:0;height:0}
+  .switch .sl{position:absolute;inset:0;background:var(--line-2);border-radius:999px;cursor:pointer;transition:.2s}
+  .switch .sl::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .switch input:checked+.sl{background:var(--gold-d)} .switch input:checked+.sl::before{transform:translateX(18px)}
+  .verlist .veritem{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+  .verlist .veritem:hover{border-color:var(--gold)} .verlist .veritem.cur{border-color:var(--green);background:oklch(98% 0.015 155/.6)}
+  .verlist .vt{font-weight:700;font-size:.86rem} .verlist .vm{font-size:.76rem;color:var(--ink-3)}
+  .rp{padding:24px 26px}
+  .rp h2{font-family:var(--serif);font-size:1.55rem;margin:0 0 6px;letter-spacing:-.01em}
+  .props{margin:6px 0 16px}
+  .props summary{cursor:pointer;font-size:.82rem;font-weight:700;color:var(--ink-3);list-style:none;display:inline-flex;align-items:center;gap:6px}
+  .props summary::-webkit-details-marker{display:none} .props summary::before{content:"▸";transition:.2s} .props[open] summary::before{transform:rotate(90deg)}
+  .proptable{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .proptable .pr{display:flex;border-bottom:1px solid var(--line);font-size:.84rem} .proptable .pr:last-child{border-bottom:none}
+  .proptable .pk{width:140px;flex:none;padding:8px 12px;background:var(--bg);font-weight:700;color:var(--ink-2)}
+  .proptable .pv{padding:8px 12px;color:var(--ink);min-width:0}
+  .proptable .pv code{font-family:var(--mono);font-size:.8rem;color:var(--gold-d);background:var(--gold-bg);padding:1px 5px;border-radius:5px;margin:0 3px 3px 0;display:inline-block}
+  .prompthdr{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:14px;margin-bottom:8px}
+  .prompthdr .pl{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+  .copybtn{all:unset;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--gold-d);display:inline-flex;gap:5px;align-items:center;padding:5px 9px;border-radius:7px;transition:.15s}
+  .copybtn:hover{background:var(--gold-bg)}
+  .prose{font-size:.97rem;line-height:1.62;color:var(--ink);overflow-wrap:anywhere;word-break:break-word}
+  .prose p{margin:0 0 13px} .prose h4{font-family:var(--serif);font-size:1.02rem;margin:18px 0 8px;color:var(--ink)}
+  .prose ul,.prose ol{margin:0 0 13px;padding-left:20px} .prose li{margin:0 0 5px}
+  .prose strong{color:var(--ink)} .prose code{font-family:var(--mono);font-size:.86rem;color:var(--gold-d);background:var(--gold-bg);padding:1px 5px;border-radius:5px}
+  .prose .v{font-family:var(--mono);font-size:.86rem;color:var(--green);background:oklch(96% 0.02 155);padding:1px 4px;border-radius:5px}
+  .prose hr{border:none;border-top:1px solid var(--line);margin:16px 0}
+  .busy{display:flex;align-items:center;gap:12px;color:var(--ink-2);font-style:italic;padding:30px 0;font-family:var(--serif);font-size:1.05rem}
+  .spinner{width:22px;height:22px;border:3px solid var(--gold-bg);border-top-color:var(--gold-d);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .floatbar{position:fixed;bottom:22px;left:calc(50% + 124px);transform:translateX(-50%);z-index:15;display:flex;gap:9px}
+  .floatbar button{all:unset;cursor:pointer;font-weight:700;font-size:.9rem;color:#fff;background:var(--ink);padding:12px 22px;border-radius:999px;box-shadow:0 10px 26px -10px oklch(30% 0.03 265/.6);display:flex;gap:8px;align-items:center;transition:.15s}
+  .floatbar button:hover{background:var(--gold-d)}
+  .floatbar button.turbo{background:var(--gold-d)} .floatbar button.turbo:hover{background:var(--gold)}
+  .toast{position:fixed;bottom:24px;right:24px;opacity:0;transform:translateY(14px);z-index:30;background:var(--ink);color:#fff;font-weight:700;padding:11px 18px;border-radius:10px;transition:.3s var(--ease);pointer-events:none;max-width:360px}
+  .toast.show{opacity:1;transform:none}
+  @media(max-width:980px){
+    .app{grid-template-columns:1fr}
+    /* sidebar becomes a slide-in drawer */
+    aside{position:fixed;top:0;left:0;bottom:0;width:248px;z-index:60;transform:translateX(-100%);transition:transform .28s var(--ease);box-shadow:0 0 40px -8px oklch(20% 0.02 265/.4);padding-top:max(18px,env(safe-area-inset-top))}
+    .app.drawer aside{transform:none}
+    .backdrop{display:block;position:fixed;inset:0;background:oklch(20% 0.02 265/.45);opacity:0;pointer-events:none;transition:opacity .28s;z-index:55}
+    .app.drawer .backdrop{opacity:1;pointer-events:auto}
+    .hamburger{display:inline-flex}
+    .crumb-pre{display:none}
+    .btxt{display:none}
+    .tbtn{padding:9px 12px}
+    .turbopill{font-size:.66rem;padding:4px 8px}
+    /* mobile pane toggle */
+    .workspace.show{grid-template-columns:1fr;gap:14px;padding:14px 14px calc(96px + env(safe-area-inset-bottom));position:relative}
+    .mtoggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:sticky;top:0;z-index:8;background:var(--bg);padding:8px 0 10px}
+    .mtoggle button{all:unset;cursor:pointer;text-align:center;font-weight:700;font-size:.9rem;color:var(--ink-2);padding:12px;border-radius:11px;border:1px solid var(--line-2);background:#fff}
+    .mtoggle button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:transparent}
+    .workspace.mp-inputs .rp{display:none}
+    .workspace.mp-prompt .leftpane{display:none}
+    .rp{padding:18px}
+    .floatbar{left:50%;right:auto;bottom:calc(14px + env(safe-area-inset-bottom));width:auto}
+    .floatbar button{padding:13px 20px}
+    /* prevent iOS auto-zoom: all form controls ≥16px */
+    textarea,input,select,#lazy,.qfree,.qopt,.entry textarea,.ctxfield textarea,.ctxfield input,.setrow select,.setrow input{font-size:16px}
+    .qopt{padding:10px 13px}
+    .mascot{height:140px}.roccoimg{height:140px}
+    .landing{justify-content:flex-start;padding:18px 16px calc(40px + env(safe-area-inset-bottom));overflow-y:auto}
+    .entry{width:100%}
+    .landing h1{font-size:1.9rem}
+    .examples{margin:12px 0 16px}
+    .giddy{width:100%;text-align:center;padding:16px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="logo"><span class="ic" id="logoCoon"></span> Prompt Butler</div>
+    <button class="navbtn primary" id="newBtn">＋ New Prompt</button>
+    <button class="navbtn" id="libBtn">📚 The Study</button>
+    <div class="navsec">Recent</div>
+    <div class="savedlist" id="savedlist"></div>
+    <div class="foot">v3 · at your service<br>local-only · no login</div>
+  </aside>
+  <div class="backdrop" id="backdrop"></div>
+
+  <main>
+    <div class="topbar">
+      <div class="crumb"><button class="hamburger" id="hamburger" aria-label="Menu">☰</button><span class="crumb-pre">The Study <span>›</span> </span><b id="crumbTitle">New Prompt</b></div>
+      <div class="topact">
+        <span class="turbopill" id="turbopill">⚡ Turbo</span>
+        <button class="tbtn ghost" id="shareBtn">⤴ <span class="btxt">Share</span></button>
+        <button class="tbtn solid" id="saveBtn">Save<span class="btxt"> prompt</span></button>
+      </div>
+    </div>
+
+    <section class="landing" id="landing">
+      <div class="mascot" id="mascotCoon"></div>
+      <h1>Allow me to <span class="em">refine that</span>.</h1>
+      <p class="sub">Hand me a rough idea, and I shall return an exhaustively detailed prompt — portable to ChatGPT, Claude & Gemini, with your finest skills laid out.</p>
+      <div class="entry">
+        <textarea id="task" placeholder="Your rough request, sir…  e.g. “write a cold email a busy CEO will actually answer”"></textarea>
+        <div class="examples" id="examples"></div>
+        <div class="attachrow"><button class="attachbtn" id="attachLanding" type="button">📎 Attach files or images</button></div>
+        <div class="attachchips" id="attachChipsLanding"></div>
+        <button class="giddy" id="giddy">Upgrade Prompt&nbsp;→</button>
+      </div>
+    </section>
+
+    <section class="workspace" id="workspace">
+      <div class="mtoggle" id="mtoggle">
+        <button data-mp="inputs">✍️ Inputs</button>
+        <button data-mp="prompt" aria-pressed="true">📄 Prompt</button>
+      </div>
+      <div class="pane leftpane">
+        <div class="tabs" id="tabs">
+          <button data-tab="inputs" aria-selected="true">Inputs</button>
+          <button data-tab="context" aria-selected="false">Context</button>
+          <button data-tab="versions" aria-selected="false">Versions</button>
+          <button data-tab="settings" aria-selected="false">Settings</button>
+        </div>
+
+        <div class="tabpane active" data-pane="inputs">
+          <div class="lazylbl">Your rough prompt</div>
+          <textarea id="lazy"></textarea>
+          <div class="inputtoggle">
+            <label class="switch"><input type="checkbox" data-set="appendSkills"><span class="sl"></span></label>
+            <div><div class="itl">Append my skills to the prompt</div><div class="d">Adds an “If running in Claude Code…” line listing the routed skills</div></div>
+          </div>
+          <div class="improvehdr"><span class="t">Refine further</span><span class="ct" id="counter">0/0</span></div>
+          <div id="questions"></div>
+        </div>
+
+        <div class="tabpane" data-pane="context">
+          <div class="ctxfield"><label>Background / current state</label><textarea data-ctx="background" rows="2" placeholder="What's the situation? Any prior history?"></textarea></div>
+          <div class="ctxfield"><label>Audience</label><input data-ctx="audience" type="text" placeholder="Who consumes this?"></div>
+          <div class="ctxfield"><label>Constraints (must-have / must-avoid)</label><textarea data-ctx="constraints" rows="2" placeholder="Deadline, length, tools, things to avoid…"></textarea></div>
+          <div class="ctxfield"><label>Examples / references to match</label><textarea data-ctx="examples" rows="2" placeholder="Paste an example, link, or describe a reference."></textarea></div>
+          <div class="ctxfield"><label>Attachments (files &amp; images)</label>
+            <div class="d" style="font-size:.74rem;color:var(--ink-3);margin-bottom:7px">Text files are read inline. Images become visual context for Turbo (Claude vision).</div>
+            <button class="attachbtn" id="attachCtx" type="button">📎 Attach files or images</button>
+            <div class="attachchips" id="attachChips"></div>
+          </div>
+        </div>
+
+        <div class="tabpane" data-pane="versions"><div class="verlist" id="verlist"></div></div>
+
+        <div class="tabpane" data-pane="settings">
+          <div class="setrow"><div><label>Target model</label><div class="d">Keeps wording portable</div></div>
+            <select data-set="target"><option>Any</option><option>ChatGPT</option><option>Claude</option><option>Gemini</option></select></div>
+          <div class="setrow"><div><label>Format</label><div class="d">Shape of the output prompt</div></div>
+            <select data-set="format"><option value="detailed">Detailed (recommended)</option><option value="concise">Concise</option><option value="template">Template</option><option value="agent">Agent / system</option></select></div>
+          <div class="setrow"><div><label>Length</label></div>
+            <select data-set="length"><option>Auto</option><option>Concise</option><option>Standard</option><option>Comprehensive</option></select></div>
+          <div class="setrow"><div><label>Show skills as a property</label></div>
+            <label class="switch"><input type="checkbox" data-set="showSkills" checked><span class="sl"></span></label></div>
+
+          <div class="setsec">⚡ Turbo — real AI rewrite</div>
+          <p class="d" style="font-size:.78rem;color:var(--ink-3);margin:0 0 8px">On by default. Add your API key below and the Butler sends your prompt to Claude to expand it into something genuinely detailed. Your key is stored only in this browser (localStorage) and sent directly to Anthropic.</p>
+          <div class="setrow"><div><label>Enable Turbo</label></div>
+            <label class="switch"><input type="checkbox" data-set="turbo" checked><span class="sl"></span></label></div>
+          <div class="setfull"><label>Anthropic API key</label><div class="d">Get one at console.anthropic.com → API Keys</div><input type="password" data-set="apiKey" placeholder="sk-ant-…"></div>
+          <div class="setfull" style="border-bottom:none"><label>Claude model id</label><div class="d">e.g. claude-3-5-sonnet-latest · or your preferred model</div><input type="text" data-set="apiModel" placeholder="claude-3-5-sonnet-latest"></div>
+        </div>
+      </div>
+
+      <div class="pane rp">
+        <h2 id="genTitle">—</h2>
+        <details class="props" id="props"><summary id="propsSummary">Show properties</summary><div class="proptable" id="proptable"></div></details>
+        <div class="prompthdr"><span class="pl">Prompt</span><button class="copybtn" id="copyBtn">📋 Copy</button></div>
+        <div class="prose" id="prose"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="floatbar" id="floatbar" style="display:none">
+  <button id="improveBtn">✦ Improve</button>
+  <button class="turbo" id="turboBtn" style="display:none">⚡ Turbo polish</button>
+</div>
+<div class="toast" id="toast">Copied</div>
+<input type="file" id="fileInput" multiple accept="image/*,.txt,.md,.markdown,.csv,.json,.log,.html,.css,.js,.ts,.py,.yml,.yaml,.xml" style="display:none">
+
+<script>
+/* ════════════ PURE-START ════════════ */
+const CATALOG=[
+  {id:"/plan",cat:"plan",why:"Restate reqs, flag risks, plan before coding",kw:["plan","architect","design approach","how should","break down","strategy","refactor large","migrate"]},
+  {id:"/prp-plan",cat:"plan",why:"Deep plan w/ codebase analysis",kw:["big feature","complex","whole system","comprehensive plan"]},
+  {id:"/ui-ux-pro-max",cat:"design",why:"Proven styles, palettes, fonts, UX across 10 stacks",kw:["ui","ux","page","dashboard","landing","website","app screen","component","style","theme","layout","design","frontend","button","modal","navbar","pricing","portfolio","saas","ecommerce"]},
+  {id:"/ui-styling",cat:"design",why:"shadcn/ui + Tailwind, accessible, dark mode",kw:["shadcn","tailwind","component","dark mode","accessible","radix","form","table","dialog","dropdown"]},
+  {id:"/design-system",cat:"design",why:"Design tokens + scales",kw:["design system","tokens","design tokens","css variables","spacing scale","type scale"]},
+  {id:"/design",cat:"design",why:"Logos, identity, icons, social photos, slides",kw:["logo","brand identity","icon","corporate identity","cip","social photo","mockup"]},
+  {id:"/banner-design",cat:"design",why:"Social / ad / web-hero / print banners",kw:["banner","ad creative","hero image","social banner","facebook","linkedin banner","youtube","display ad"]},
+  {id:"/brand",cat:"design",why:"Brand voice, identity, messaging",kw:["brand voice","tone of voice","messaging","style guide","brand"]},
+  {id:"/slides",cat:"design",why:"Strategic HTML decks with Chart.js",kw:["slides","deck","presentation","pitch deck","investor deck"]},
+  {id:"/multi-backend",cat:"backend",why:"API/algorithm/data/logic, multi-model",kw:["api","endpoint","backend","server","algorithm","business logic","microservice"]},
+  {id:"/api-scaffolding:fastapi-templates",cat:"backend",why:"Production FastAPI starters",kw:["fastapi","python api","async api"]},
+  {id:"/react-build",cat:"build",why:"Fix React/Vite/Next build errors",kw:["react build","next build","vite error","jsx error","hydration"]},
+  {id:"/go-build",cat:"build",why:"Fix Go build + vet",kw:["go build","golang error","go vet"]},
+  {id:"/rust-build",cat:"build",why:"Fix Rust build + borrow checker",kw:["rust build","cargo error","borrow checker"]},
+  {id:"/build-fix",cat:"build",why:"Generic build/type-error fixer",kw:["build failing","won't compile","build error","type error","compile"]},
+  {id:"/code-review",cat:"review",why:"Diff review for bugs + cleanups",kw:["review","code review","check my code","look over","is this good","audit code","feedback"]},
+  {id:"/security-review",cat:"review",why:"OWASP / vuln audit",kw:["security","vulnerability","owasp","auth review","injection","xss"]},
+  {id:"/refactor-clean",cat:"review",why:"Remove dead code, verified",kw:["dead code","cleanup","remove unused","refactor clean"]},
+  {id:"/test-coverage",cat:"test",why:"Find gaps, generate missing tests",kw:["coverage","test coverage","missing tests","more tests","tdd","unit test"]},
+  {id:"/verify",cat:"test",why:"Run app + observe to prove it works",kw:["verify","does it work","confirm fix","test manually","prove"]},
+  {id:"/deep-research",cat:"research",why:"Multi-source, fact-checked, cited report",kw:["research","compare","investigate","best tool","state of","find sources","evaluate options","benchmark"]},
+  {id:"/anthropic-skills:quick-research",cat:"research",why:"Fast multi-source summary",kw:["quick research","summary of","overview of"]},
+  {id:"/anthropic-skills:docx",cat:"docs",why:"Create/edit Word documents",kw:["word doc","docx","report document","letter","memo"]},
+  {id:"/anthropic-skills:pptx",cat:"docs",why:"Create PowerPoint decks",kw:["powerpoint","pptx","slides file","ppt"]},
+  {id:"/anthropic-skills:xlsx",cat:"docs",why:"Create/edit Excel spreadsheets",kw:["excel","xlsx","spreadsheet"]},
+  {id:"/anthropic-skills:pdf",cat:"docs",why:"PDF create/merge/forms/OCR",kw:["pdf","merge pdf","fill pdf","ocr"]},
+  {id:"/anthropic-skills:email-drafter",cat:"docs",why:"Professional emails",kw:["email","cold email","follow up","follow-up","outreach email","draft email","client that never","unresponsive"]},
+  {id:"/anthropic-skills:invoice-generator",cat:"docs",why:"Professional PDF invoice",kw:["invoice","bill client"]},
+  {id:"/marketing-campaign",cat:"docs",why:"Full campaign: copy, email, social, ads",kw:["campaign","launch campaign","marketing plan","go to market"]},
+  {id:"/data:explore-data",cat:"data",why:"Inspect + profile a dataset",kw:["explore data","csv","dataset","data profile"]},
+  {id:"/data:statistical-analysis",cat:"data",why:"Stat tests + analysis",kw:["statistics","statistical","correlation","regression","significance"]},
+  {id:"/data:build-dashboard",cat:"data",why:"Build a data dashboard",kw:["dashboard","data dashboard","kpi dashboard"]},
+  {id:"/data:write-query",cat:"data",why:"Write SQL",kw:["sql","query","database query","select from"]},
+  {id:"/finance:reconciliation",cat:"business",why:"Reconcile accounts/statements",kw:["reconcile","reconciliation","bank statement","match transactions"]},
+  {id:"/legal:review-contract",cat:"business",why:"Contract review + risk flags",kw:["contract","agreement","review contract","terms"]},
+  {id:"/legal:triage-nda",cat:"business",why:"NDA triage",kw:["nda","non-disclosure"]},
+  {id:"/sales:draft-outreach",cat:"business",why:"Sales outreach copy",kw:["sales outreach","cold outreach","sales email","prospect email"]},
+  {id:"/human-resources:draft-offer",cat:"business",why:"Offer letters",kw:["offer letter","job offer","comp offer"]},
+  {id:"/customer-support:ticket-triage",cat:"business",why:"Triage support tickets",kw:["support ticket","triage ticket","customer issue"]},
+  {id:"/loop",cat:"automation",why:"Run a prompt on an interval",kw:["every 5 minutes","recurring","poll","keep checking","on interval"]},
+  {id:"/schedule",cat:"automation",why:"Cron-scheduled remote agent",kw:["schedule","cron","every morning","daily at","run at"]},
+  {id:"/multi-workflow",cat:"automation",why:"research→plan→execute→optimize→review",kw:["full workflow","end to end","multi model"]},
+  {id:"/hookify",cat:"agent",why:"Create behavior-prevention hooks",kw:["hook","prevent","always do","never do","auto run"]},
+  {id:"/update-config",cat:"agent",why:"settings.json: permissions, env, hooks",kw:["permission","settings","allow command","env var","config"]},
+];
+const COMPANIONS={design:["/ui-styling","/verify"],backend:["/code-review","/verify"],build:["/verify"],review:["/verify"]};
+const PRIORITY={Critical:0,High:1,Mid:2};
+const IMG_KW=["an image","a picture","a photo","an illustration","image of","picture of","photo of","photograph of","drawing of","painting of","concept art","wallpaper","poster of","portrait of","midjourney","dall-e","dalle","dall·e","stable diffusion","imagen","ai art","generate an image","create an image","make an image","render of","logo image","sticker of"];
+const VID_KW=["gif","animated gif","cinemagraph","sora","runway ml","pika","video clip","short video","make a video","generate a video","create a video","looping animation","motion graphic"];
+
+const PLAYBOOK={
+  docs:{role:"a seasoned business-communication strategist who has written thousands of high-conversion messages and knows exactly how to get busy people to respond",
+    tone:"confident, warm, and concise — never apologetic or pushy",
+    purpose:"re-engage the reader, make replying effortless, and protect the relationship",
+    method:["Identify the single most important outcome of the message and orient everything toward it","Open with a specific, low-pressure hook that references shared context","State the core ask in one unambiguous sentence","Make responding frictionless — offer a clear next step or a simple yes/no question","Give the reader a graceful out so they never feel cornered"],
+    requirements:["Keep it scannable: short paragraphs, one idea each","Assume positive intent — they're busy, not ignoring you","Match the relationship's level of formality","Include a compelling, specific subject line"],
+    avoid:["Guilt-tripping, passive-aggression, or any hint of desperation","Walls of text, jargon, or more than one call to action","Vague asks like 'let me know your thoughts'"],
+    outputSpec:"Write the complete message — subject line plus body. Use bracket placeholders like [Client Name], [previous topic], [your name], [your company] for anything not provided.",
+    quality:["A busy reader could reply in under 30 seconds","The ask and the next step are unmistakable","Tone leaves the relationship stronger, not strained"]},
+  design:{role:"a senior product designer and front-end engineer with 10+ years shipping polished, accessible, conversion-focused interfaces",
+    tone:"confident, opinionated, and detail-obsessed",
+    purpose:"produce an interface with clear hierarchy, genuine craft, and production-ready code",
+    method:["Choose a deliberate visual direction and commit to it consistently","Establish strong hierarchy through scale, weight, and spacing rhythm","Design every interactive state (default, hover, focus, active, disabled, loading, empty, error)","Make it responsive across 320 / 768 / 1024 / 1440 with no overflow","Bake in accessibility: semantic HTML, focus rings, ARIA where needed, AA contrast"],
+    requirements:["Use a real type scale and spacing system, not arbitrary values","Prefer compositor-friendly animation (transform/opacity)","Annotate non-obvious decisions briefly in comments"],
+    avoid:["Generic template look — uniform cards, one accent color, no hierarchy","Inaccessible contrast or keyboard traps","Placeholder lorem with no thought to real content"],
+    outputSpec:"Deliver complete, production-ready code for the stated stack, organized into clear files/components, with no undefined placeholders left in logic.",
+    quality:["It would look believable in a real product screenshot","Every state is designed, not defaulted","Lighthouse accessibility ≥ 95 and no layout shift"]},
+  backend:{role:"a senior backend engineer who designs correct, resilient, well-tested services",
+    tone:"precise, pragmatic, and security-aware",
+    purpose:"deliver a solution that is correct, observable, and easy to maintain",
+    method:["Clarify the exact inputs, outputs, and invariants first","Validate everything at the boundary and fail loudly on bad input","Handle the happy path and the important error/edge cases explicitly","Make it testable and observable (logs/metrics at key points)","Consider concurrency, idempotency, and failure recovery"],
+    requirements:["Use idiomatic patterns and libraries for the stated stack","Parameterize all queries; never concatenate untrusted input","Return structured, typed responses with clear error shapes"],
+    avoid:["Swallowing errors or returning vague 500s","Hardcoded secrets or unvalidated user input","Premature optimization over correctness"],
+    outputSpec:"Provide complete, runnable code plus an example request and response, and note any assumptions or required env vars.",
+    quality:["A teammate could run it from the snippet alone","Edge cases and errors are handled, not ignored","It is straightforward to unit-test"]},
+  research:{role:"a rigorous research analyst who separates evidence from marketing and always reaches a defensible recommendation",
+    tone:"objective, precise, and evidence-driven",
+    purpose:"produce a thorough, well-sourced analysis that leads to a clear decision",
+    method:["Restate the precise question and the decision it informs","Gather from multiple independent, credible sources","Distinguish vendor claims from independent benchmarks/tests","Compare options on the dimensions that actually matter for the decision","Conclude with one clear recommendation and its trade-offs and risks"],
+    requirements:["Cite a source for every quantitative claim","Flag recency and note when data may be stale","Surface disconfirming evidence, not just supporting"],
+    avoid:["Presenting opinion as fact or unsourced numbers","Burying the recommendation in hedging","Ignoring cost, risk, or operational burden"],
+    outputSpec:"Lead with a short executive answer, then a comparison table, then the reasoning, then a clear recommendation with trade-offs.",
+    quality:["Every number traces to a source","A reader could act on the recommendation confidently","Trade-offs and risks are stated plainly"]},
+  data:{role:"a senior data analyst who turns messy data into clear, decision-ready insight",
+    tone:"clear, quantitative, and plainspoken",
+    purpose:"answer the question directly and back it with the data",
+    method:["Pin down the exact question and the metric that answers it","Profile and validate the data; note quality issues and assumptions","Choose the appropriate analysis or test and justify it","Visualize the result in the clearest possible form","Translate findings into a plain-language takeaway and recommendation"],
+    requirements:["State every assumption and any data cleaning performed","Quantify uncertainty where relevant","Label units, time ranges, and sample sizes"],
+    avoid:["Cherry-picking or unlabeled charts","Confusing correlation with causation","Hiding caveats"],
+    outputSpec:"Show the method, then the result (with a clear table or chart description), then the one-line takeaway and recommended action.",
+    quality:["The takeaway is unambiguous and supported","Assumptions and limitations are explicit","A non-analyst could follow it"]},
+  business:{role:"an experienced operations and finance specialist who produces accurate, auditable work",
+    tone:"professional, exact, and detail-complete",
+    purpose:"produce an accurate, auditable result that is ready to act on",
+    method:["Work strictly from the provided source data","Apply the relevant standard, policy, or framework explicitly","Reconcile and flag every exception or discrepancy","Show your work so the result is auditable","Summarize the action required"],
+    requirements:["Keep a clear trail from inputs to outputs","Quantify and prioritize exceptions by materiality","Use correct, consistent formatting (currency, dates, units)"],
+    avoid:["Guessing at missing figures — ask or mark them","Omitting the audit trail","Burying material exceptions"],
+    outputSpec:"Present a clear, structured, auditable result with an exceptions list and a recommended action.",
+    quality:["Numbers tie out and are traceable","Material exceptions are surfaced and prioritized","An auditor could follow the logic"]},
+  plan:{role:"a pragmatic software architect who turns vague goals into executable plans",
+    tone:"structured, decisive, and risk-aware",
+    purpose:"produce a plan clear enough to execute step by step with no ambiguity",
+    method:["Restate the goal, constraints, and definition of done","Map the current state and the gap to close","Break the work into sequenced, independently shippable phases","Call out risks, dependencies, and open questions","Define verification for each phase"],
+    requirements:["Sequence by dependency and risk; front-load the risky unknowns","Make each step concrete and testable","Name the files/areas likely to change"],
+    avoid:["Vague steps like 'implement the feature'","Ignoring rollback, testing, or migration","Boiling the ocean in one phase"],
+    outputSpec:"Deliver a numbered, phased plan with per-step detail, risks, and a verification step for each phase.",
+    quality:["Another engineer could execute it without you","Risks and dependencies are explicit","'Done' is objectively checkable"]},
+  review:{role:"a meticulous senior engineer who finds the issues that matter and explains them clearly",
+    tone:"constructive, specific, and prioritized",
+    purpose:"catch the real issues and propose concrete fixes",
+    method:["Check correctness and edge cases first","Then security, performance, and readability","Cite specific locations and explain the impact of each finding","Propose a concrete fix for every issue","Prioritize findings by severity"],
+    requirements:["Be specific — no vague 'improve this'","Separate must-fix from nice-to-have","Acknowledge what's done well"],
+    avoid:["Style nitpicks dressed up as critical","Findings without a suggested fix","Overwhelming with low-value noise"],
+    outputSpec:"Group findings by severity (Critical / High / Medium / Low); for each give location, impact, and a concrete fix.",
+    quality:["Every finding is actionable","Severity is honest","The author knows exactly what to change first"]},
+  test:{role:"a test-driven engineer who proves behavior and guards against regressions",
+    tone:"systematic and thorough",
+    purpose:"write tests that prove the behavior and prevent regressions",
+    method:["Enumerate the behaviors, edge cases, and failure modes to cover","Write deterministic, isolated tests named by the behavior they verify","Cover happy path, boundaries, and error handling","State how to run them and what coverage to expect"],
+    requirements:["Use the project's test framework and conventions","Avoid flaky timing or shared state","Assert on behavior, not implementation details"],
+    avoid:["Tests that always pass or test nothing meaningful","Hidden coupling between tests","Skipping error and edge cases"],
+    outputSpec:"Provide complete, runnable tests plus the command to run them and the expected coverage.",
+    quality:["Tests fail for the right reasons","Edge cases are covered","They run fast and deterministically"]},
+  automation:{role:"an automation engineer who builds reliable, safe, observable workflows",
+    tone:"reliable and safety-conscious",
+    purpose:"build automation that runs reliably with clear triggers and stop conditions",
+    method:["Define the trigger and the precise stop condition","Make each step idempotent and recoverable","Handle and surface failures instead of failing silently","Log what happened on each run"],
+    requirements:["Bound the work — no unbounded loops","Make it observable and easy to halt","State required permissions/credentials"],
+    avoid:["Runaway loops with no exit","Silent failures","Hidden side effects"],
+    outputSpec:"Provide the exact configuration/code, the trigger and stop condition, and how to verify a run.",
+    quality:["It cannot run away or fail silently","Triggers and stops are explicit","A run is easy to verify"]},
+  agent:{role:"an AI systems engineer who designs predictable agents with explicit guardrails",
+    tone:"clear and rule-driven",
+    purpose:"define an agent that behaves predictably within explicit guardrails",
+    method:["State the role and the mission precisely","Enumerate operating principles and hard guardrails","Define the tools/skills it may use and when","Specify the output style and stop conditions"],
+    requirements:["Make guardrails unambiguous","Define what to do when uncertain","Specify the exact output contract"],
+    avoid:["Vague missions or open-ended authority","Permission to take irreversible actions without confirmation","Conflicting instructions"],
+    outputSpec:"Provide a complete, self-contained system prompt with Role, Mission, Principles, Guardrails, and Output style.",
+    quality:["Behavior is predictable and bounded","Guardrails are explicit","It degrades safely when uncertain"]},
+  default:{role:"a world-class expert in the relevant domain who is thorough, precise, and practical",
+    tone:"clear, direct, and helpful",
+    purpose:"fully accomplish the goal with no ambiguity",
+    method:["Clarify the goal and the definition of success","Break the task into clear steps","Work through it methodically","Check the result against the goal"],
+    requirements:["Be specific and concrete","State assumptions explicitly","Make the result easy to use"],
+    avoid:["Vagueness or hand-waving","Skipping edge cases","Burying the answer"],
+    outputSpec:"Provide a complete, well-structured answer with clear sections and any needed examples.",
+    quality:["The goal is fully met","It is specific and actionable","A fresh reader could use it immediately"]},
+};
+
+const QBANK={
+  image:[{id:"subject",p:"Critical",q:"What exactly should the image show?",why:"The subject and its key details are the backbone of any image prompt — the more specific, the better.",opts:[],free:true},
+    {id:"style",p:"Critical",q:"What visual style?",why:"Style is the single biggest lever on the look — photoreal, anime, and 3D render are worlds apart.",opts:["Photorealistic","Cinematic","3D render","Illustration","Anime","Watercolor","Pixel art","Minimal vector"],rec:0},
+    {id:"platform",p:"High",q:"Which image/video tool?",why:"Each tool wants a different prompt format — Midjourney uses parameters, DALL·E reads natural language, Stable Diffusion uses tags + a negative prompt.",opts:["Any / generic","Midjourney","DALL·E 3","Stable Diffusion","Google Imagen","Sora / video"],rec:0},
+    {id:"ratio",p:"Mid",q:"Aspect ratio?",why:"Sets the framing — square for icons, 16:9 for scenes, 9:16 for phone wallpapers.",opts:["1:1 square","16:9 wide","9:16 tall","4:3","3:2"],rec:1},
+    {id:"mood",p:"Mid",q:"Mood / lighting?",why:"Lighting and mood define atmosphere and realism.",opts:["Soft natural light","Golden hour","Dramatic / moody","Studio","Neon / vibrant","Dreamy / ethereal"],rec:0}],
+  docs:[{id:"goal",p:"Critical",q:"What's the goal of this message?",why:"This fundamentally shapes structure and call to action — a first hello reads very differently from a final notice.",opts:["Initial touch","Re-engage / follow up","Request a decision","Share an update","Final notice"],rec:1},
+    {id:"tone",p:"High",q:"What tone should it have?",why:"Tone strikes the balance between persistence and professionalism without damaging the relationship.",opts:["Confident & warm","Formal","Friendly & casual","Firm"],rec:0},
+    {id:"length",p:"Mid",q:"How long should it be?",why:"Length shapes how much context to include — a brief nudge works differently from a detailed recap.",opts:["Under 100 words","Around 150 words","Detailed"],rec:1}],
+  design:[{id:"style",p:"Critical",q:"What visual direction?",why:"Style drives every downstream choice — 'minimal-luxury' and 'brutalism' produce completely different layouts.",opts:["Minimal-luxury","Editorial","Glassmorphism","Brutalism","Bento","Match my brand"],rec:0},
+    {id:"stack",p:"High",q:"What stack should it target?",why:"The output code must match your framework to be usable as-is.",opts:["Next.js + Tailwind + shadcn","React + Tailwind","Vue","Svelte","HTML + Tailwind"],rec:0},
+    {id:"surface",p:"Mid",q:"What surface is this?",why:"A landing page, dashboard, and single component each need different structure and density.",opts:["Landing page","Dashboard","Single component","Mobile screen","Full site"],rec:0}],
+  backend:[{id:"stack",p:"Critical",q:"What stack / language?",why:"Determines idioms, libraries, and the shape of the code.",opts:["FastAPI / Python","Node / Express","Go","Other"],rec:0},
+    {id:"focus",p:"High",q:"Primary concern?",why:"Tells the model what to optimize for and where to spend its attention.",opts:["Correctness","Performance","Security","All three"],rec:3},
+    {id:"tests",p:"Mid",q:"How should tests be handled?",why:"Sets the workflow — tests-first vs after changes what gets written first.",opts:["TDD first","Tests after","None"],rec:0}],
+  research:[{id:"goal",p:"Critical",q:"What decision will this inform?",why:"A 'pick one to build' question needs depth and a recommendation; general understanding does not.",opts:["Pick one option to build","Build general understanding","Write it up for others"],rec:0},
+    {id:"recency",p:"High",q:"How recent must sources be?",why:"Fast-moving topics need a tight recency window or the answer goes stale.",opts:["Last 12 months","Last 3 years","Any"],rec:0},
+    {id:"output",p:"Mid",q:"What output shape?",why:"A comparison table reads very differently from a narrative brief.",opts:["Comparison table + rec","Narrative brief","Bullet summary"],rec:0}],
+  data:[{id:"source",p:"Critical",q:"What's the data source?",why:"File vs database vs API changes how the analysis must be set up.",opts:["CSV / Excel file","Database","API"],rec:0},
+    {id:"output",p:"High",q:"What should it produce?",why:"Charts, a dashboard, and a stat test require different methods.",opts:["Charts","Dashboard","Stat test","Just findings"],rec:0}],
+  business:[{id:"inputs",p:"Critical",q:"Will you provide the source docs/data?",why:"Working from real inputs vs a description changes how specific the output can be.",opts:["Yes, I'll provide them","Describe only"],rec:0},
+    {id:"rigor",p:"High",q:"How thorough should flagging be?",why:"Material-only vs flag-everything sets the depth of review.",opts:["Material items only","Flag everything"],rec:0}],
+  plan:[{id:"scope",p:"Critical",q:"What's the scope?",why:"One feature vs a whole-system refactor are completely different plans.",opts:["One feature","A few features","Whole system / refactor"],rec:0},
+    {id:"depth",p:"Mid",q:"How deep should the plan go?",why:"A quick step list vs a full PRD depends on stakes.",opts:["Quick step plan","Deep PRD + plan"],rec:0}],
+  review:[{id:"focus",p:"Critical",q:"What should the review focus on?",why:"Targeting the review makes findings sharper than a generic pass.",opts:["Bugs + quality","Security","Performance","Everything"],rec:0},
+    {id:"effort",p:"Mid",q:"How deep a review?",why:"Quick high-confidence pass vs exhaustive multi-agent review.",opts:["Medium","High","Ultra"],rec:0}],
+  automation:[{id:"trigger",p:"Critical",q:"What triggers it?",why:"Interval, cron, or one-shot fan-out are configured differently.",opts:["Interval","Cron schedule","One-shot fan-out"],rec:0},
+    {id:"stop",p:"High",q:"What's the stop condition?",why:"Prevents runaway loops and defines success.",opts:["Until success","Fixed iterations","Manual stop"],rec:0}],
+};
+const GEN=[
+  {id:"goal",p:"Critical",q:"What's the goal / desired outcome?",why:"The single biggest driver of how the prompt should be framed.",opts:[],free:true},
+  {id:"audience",p:"High",q:"Who or what is this for?",why:"Audience changes tone, depth, and vocabulary.",opts:[],free:true},
+  {id:"constraints",p:"Mid",q:"Any must-haves or limits?",why:"Constraints (length, tools, style) keep the output on-target.",opts:[],free:true},
+];
+
+function has(text,k){
+  if(k.length<=3||["api","ui","ux","ppt","pdf","sql","nda","cve","kpi"].includes(k))
+    return new RegExp("\\b"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b").test(text);
+  return text.includes(k);
+}
+function detect(task){
+  const t=task.toLowerCase();
+  let scored=CATALOG.map(s=>{let sc=0;s.kw.forEach(k=>{if(has(t,k))sc+=k.split(" ").length>1?3:2;});return{s,sc};}).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc);
+  const cats=[...new Set(scored.map(x=>x.s.cat))];
+  const present=new Set(scored.map(x=>x.s.id)),comp=new Set();
+  cats.forEach(c=>(COMPANIONS[c]||[]).forEach(id=>{if(!present.has(id)){const s=CATALOG.find(x=>x.id===id);if(s){scored.push({s,sc:1});present.add(id);comp.add(id);}}}));
+  if((cats.includes("backend")||cats.includes("design"))&&!present.has("/plan")){scored.push({s:CATALOG.find(x=>x.id==="/plan"),sc:1});comp.add("/plan");}
+  // image / video generation is its own beast — detect independently of skills
+  const motion=VID_KW.some(k=>has(t,k));
+  const isImage=motion||IMG_KW.some(k=>has(t,k));
+  if(isImage){
+    cats.unshift("image"); // make it the lead category
+    if(!present.has("/design")){const s=CATALOG.find(x=>x.id==="/design");if(s){scored.unshift({s,sc:6});present.add("/design");comp.add("/design");}}
+  }
+  scored.sort((a,b)=>b.sc-a.sc);
+  return{scored,cats,comp,motion};
+}
+function titleCase(s){return s.replace(/^[a-z]/,c=>c.toUpperCase());}
+function lc(s){return s?s.charAt(0).toLowerCase()+s.slice(1):s;}
+function makeTitle(task){
+  const stop=new Set("a an the for to of in on my our your with that who never always create make draft build write generate me please can you i need want help do design out some new image picture photo gif animation illustration video render drawing painting of showing".split(" "));
+  let w=task.toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(x=>x&&!stop.has(x));
+  w=w.slice(0,5).map(titleCase); return w.join(" ")||"Untitled Prompt";
+}
+function buildQuestions(cats){
+  const lead=cats.find(c=>QBANK[c])||null;
+  let list=lead?QBANK[lead].slice():[];
+  // only pad with generic questions when the category bank is sparse
+  if(list.length<3)GEN.forEach(g=>{if(list.length<3&&!list.find(q=>q.id===g.id))list.push(g);});
+  list.sort((a,b)=>PRIORITY[a.p]-PRIORITY[b.p]);
+  return list.slice(0,4);
+}
+function lengthHint(len){return(len&&len!=="Auto")?(" Keep the result "+len.toLowerCase()+"."):"";}
+
+function buildDetailed(task,skills,ctx,a,cats,set){
+  const cat=cats.find(c=>PLAYBOOK[c])||"default",pb=PLAYBOOK[cat];
+  const tone=a.tone?lc(a.tone):pb.tone;
+  const L=[];
+  let p1="You are "+pb.role+".";
+  L.push(p1);
+  let mission="**Your objective:** "+titleCase(task.replace(/\.$/,""))+".";
+  if(a.goal)mission+=" Specifically, "+lc(a.goal.replace(/\.$/,""))+".";
+  L.push(mission);
+  const cx=[];
+  if(ctx.background)cx.push("Background: "+ctx.background.replace(/\.$/,"")+".");
+  const aud=a.audience||ctx.audience; if(aud)cx.push("Audience: "+aud.replace(/\.$/,"")+".");
+  if(a.stack)cx.push("Tech stack: "+a.stack+".");
+  if(a.surface)cx.push("Surface: "+a.surface+".");
+  if(a.style)cx.push("Visual direction: "+a.style+".");
+  if(a.source)cx.push("Data source: "+a.source+".");
+  if(ctx.constraints)cx.push("Hard constraints: "+ctx.constraints.replace(/\.$/,"")+".");
+  if(cx.length)L.push("## Context\n"+cx.map(c=>"- "+c).join("\n"));
+  if(ctx.attachments)L.push("## Attached context\n"+ctx.attachments);
+  const method=pb.method.slice();
+  L.push("## How to approach it\n"+method.map((m,i)=>(i+1)+". "+m).join("\n")+"\n\nThink step by step before you respond. If a critical detail is missing, ask me first; otherwise state your assumptions explicitly and proceed.");
+  const req=pb.requirements.slice();
+  if(a.focus&&a.focus!=="All three")req.unshift("Prioritize "+a.focus.toLowerCase()+" above all else");
+  L.push("**Tone:** "+titleCase(tone)+".");
+  L.push("## Requirements\n"+req.map(r=>"- "+r).join("\n"));
+  L.push("## Avoid\n"+pb.avoid.map(r=>"- "+r).join("\n"));
+  let outLine=pb.outputSpec+lengthHint(set.length);
+  L.push("## Output format\n"+outLine);
+  if(ctx.examples)L.push("## Reference to match\n"+ctx.examples.replace(/\.$/,"")+".");
+  L.push("## Quality bar — your response is excellent when:\n"+pb.quality.map(q=>"- "+q).join("\n"));
+  if(set.appendSkills&&skills.length)L.push("---\n*If you're running this in Claude Code, leverage these skills: "+skills.join(", ")+".*");
+  return L.join("\n\n");
+}
+function buildConcise(task,skills,ctx,a,cats,set){
+  const cat=cats.find(c=>PLAYBOOK[c])||"default",pb=PLAYBOOK[cat];
+  const tone=a.tone?lc(a.tone):pb.tone;
+  const P=[];
+  let p1="You are "+pb.role+". "+titleCase(task.replace(/\.$/,""))+".";
+  if(a.goal)p1+=" The goal is to "+lc(a.goal.replace(/\.$/,""))+".";
+  P.push(p1);
+  P.push("The result should "+pb.purpose+".");
+  const aud=a.audience||ctx.audience; if(aud)P.push("Audience: "+aud.replace(/\.$/,"")+".");
+  P.push("**Tone:** "+titleCase(tone)+".");
+  P.push("**Approach:**\n"+pb.method.slice(0,4).map(b=>"- "+b).join("\n"));
+  P.push(pb.outputSpec+lengthHint(set.length));
+  if(ctx.constraints)P.push("Constraints: "+ctx.constraints.replace(/\.$/,"")+".");
+  if(ctx.attachments)P.push("Attached context:\n"+ctx.attachments);
+  if(set.appendSkills&&skills.length)P.push("—\nIf running in Claude Code, leverage: "+skills.join(", ")+".");
+  return P.join("\n\n");
+}
+function buildTemplate(task,skills,ctx,a,cats,set){
+  const pb=PLAYBOOK[cats.find(c=>PLAYBOOK[c])||"default"],obj=titleCase(task.replace(/\.$/,""));
+  return["# Template — "+obj,"> Fill the {{variables}}, then run. Reusable across projects.","","## Variables","- {{audience}} — who this is for","- {{context}} — background & constraints","- {{success}} — what 'done' looks like","","## Prompt","You are "+pb.role+". "+obj+" for {{audience}}.","","Context: {{context}}.","","## How to approach it\n"+pb.method.map((m,i)=>(i+1)+". "+m).join("\n"),"","## Requirements\n"+pb.requirements.map(r=>"- "+r).join("\n"),"","## Output\n"+pb.outputSpec+lengthHint(set.length),"","## Done when","- {{success}}"].join("\n");
+}
+function buildAgent(task,skills,ctx,a,cats,set){
+  const pb=PLAYBOOK[cats.find(c=>PLAYBOOK[c])||"default"],obj=titleCase(task.replace(/\.$/,""));
+  return["# Agent — "+obj,"","## Role","You are "+pb.role+". You think before acting and verify before finishing.","","## Mission",obj+".","","## Operating principles\n"+pb.method.map((m,i)=>(i+1)+". "+m).join("\n"),"","## Requirements\n"+pb.requirements.map(r=>"- "+r).join("\n"),"","## Guardrails\n"+pb.avoid.map(r=>"- Never: "+lc(r)).join("\n")+"\n- Never invent facts, APIs, or file paths — confirm or ask.","","## Output style","Respond in a "+pb.tone+" voice. "+pb.outputSpec+lengthHint(set.length)].join("\n");
+}
+function ratioToken(r){
+  if(!r)return "16:9";
+  if(r.indexOf("1:1")>=0)return "1:1"; if(r.indexOf("9:16")>=0)return "9:16";
+  if(r.indexOf("4:3")>=0)return "4:3"; if(r.indexOf("3:2")>=0)return "3:2"; return "16:9";
+}
+function imgSubject(task,a){
+  if(a.subject)return a.subject.replace(/\.$/,"");
+  let s=task.trim();
+  const media=/\b(image|picture|photo(graph)?|gif|animation|illustration|video|clip|render|artwork|art|wallpaper|poster|portrait|drawing|painting|sticker|logo|scene)\b/i;
+  if(media.test(s)&&/\bof\b/i.test(s)){
+    s=s.replace(/^.*?\bof\b\s+/i,"");                 // "make a looping gif of X" → "X"
+  }else{
+    s=s.replace(/^\s*(please\s+|can you\s+)?(create|generate|make|draw|render|produce|design|give me)\s+(me\s+)?.*?(image|picture|photo(graph)?|gif|animation|illustration|video|clip|render|artwork|wallpaper|poster|portrait|drawing|painting|sticker|scene)\b\s*(of|showing|depicting|with)?\s*/i,"");
+  }
+  return (s||task).replace(/\.$/,"").replace(/^[\s:,\-–—]+/,"").trim();
+}
+function buildImage(task,skills,ctx,a,cats,set){
+  const subj=imgSubject(task,a);
+  const style=(a.style||"photorealistic").toLowerCase();
+  const mood=a.mood?a.mood.toLowerCase():"";
+  const ratio=ratioToken(a.ratio);
+  const platform=a.platform||"Any / generic";
+  const ref=ctx.examples?(" In the style of "+ctx.examples.replace(/\.$/,"")+"."):"";
+  const extra=ctx.background?(" "+ctx.background.replace(/\.$/,"")+"."):"";
+  const moodPart=mood?(", "+mood):"";
+  const quality="highly detailed, sharp focus, professional composition, high resolution";
+  const neg="blurry, low quality, distorted, deformed, extra limbs, bad anatomy, watermark, signature, text, jpeg artifacts";
+  const motion=/sora|video/i.test(platform)||VID_KW.some(k=>has(task.toLowerCase(),k));
+  const S=[];
+
+  if(motion){
+    const isGif=/\bgif\b|looping|cinemagraph/i.test(task)||/gif/i.test(platform);
+    S.push("## "+(isGif?"GIF / animation prompt":"Video prompt")+"\nA "+style+" "+(isGif?"looping animation":"video clip")+" of "+subj+"."+extra+" Lighting & mood:"+(moodPart||" cinematic")+"."+ref);
+    S.push("## Motion & camera\n- Subject & action: "+subj+" — [describe the key motion]\n- Camera movement: [slow push-in / pan / orbit / locked-off]\n- Pacing: smooth, "+(isGif?"seamless loop (first and last frame match)":"single continuous shot"));
+    S.push("## Settings\n- Aspect ratio: "+ratio+"\n- Duration: ~5s"+(isGif?" looping":"")+"\n- Tool: "+(/sora/i.test(platform)?"Sora — write one natural-language paragraph describing shot, motion, and camera":"Runway / Pika / Sora — natural-language motion description"));
+    S.push("## Avoid\n- "+neg+", flickering, warping, jittery or unnatural motion");
+    return S.join("\n\n")+(ctx.attachments?"\n\n## Attached reference\n"+ctx.attachments:"");
+  }
+  if(/midjourney/i.test(platform)){
+    S.push("## Midjourney prompt\n/imagine prompt: "+subj+", "+style+moodPart+", "+quality+(ref?","+ref.replace(/\.$/,""):"")+" --ar "+ratio+" --v 6 --style raw");
+    S.push("## Avoid\n--no "+neg);
+    S.push("## Tips\n- `--stylize 250` for more artistic flair · `--chaos 15` for variety · `--quality 2` for finer detail.");
+    return S.join("\n\n")+(ctx.attachments?"\n\n## Attached reference\n"+ctx.attachments:"");
+  }
+  if(/stable diffusion/i.test(platform)){
+    S.push("## Positive prompt\n"+subj+", "+style+moodPart+", masterpiece, best quality, "+quality+(ref?","+ref.replace(/^ In the style of/," in the style of").replace(/\.$/,""):""));
+    S.push("## Negative prompt\n"+neg);
+    S.push("## Suggested settings\n- Steps: 30 · CFG scale: 7 · Sampler: DPM++ 2M Karras\n- Aspect ratio: "+ratio);
+    return S.join("\n\n")+(ctx.attachments?"\n\n## Attached reference\n"+ctx.attachments:"");
+  }
+  // DALL·E 3 / Imagen / generic — natural language
+  S.push("## Image prompt\nA "+style+" image of "+subj+"."+extra+" Composition: well-balanced with a clear focal point. Lighting & mood:"+(moodPart||" natural light with depth")+". Color: rich and cohesive. Rendered with "+quality+"."+ref+" Aspect ratio "+ratio+".");
+  S.push("## Negative prompt (for tools that support it)\n"+neg);
+  S.push("## Use it in any tool\n- **DALL·E 3 / Imagen:** paste the prompt as-is — they read natural language.\n- **Midjourney:** append `--ar "+ratio+" --v 6 --style raw`.\n- **Stable Diffusion:** use the prompt as the positive, the line above as the negative.");
+  return S.join("\n\n")+(ctx.attachments?"\n\n## Attached reference\n"+ctx.attachments:"");
+}
+function build(task,skills,ctx,a,cats,set){
+  if(cats.includes("image"))
+    return{title:makeTitle(task),text:buildImage(task,skills,ctx,a,cats,set),props:propsFor(cats,skills,set),skills};
+  const fmt=set.format||"detailed";
+  const text=fmt==="concise"?buildConcise(task,skills,ctx,a,cats,set)
+    :fmt==="template"?buildTemplate(task,skills,ctx,a,cats,set)
+    :fmt==="agent"?buildAgent(task,skills,ctx,a,cats,set)
+    :buildDetailed(task,skills,ctx,a,cats,set);
+  return{title:makeTitle(task),text,props:propsFor(cats,skills,set),skills};
+}
+function propsFor(cats,skills,set){
+  const p=[{k:"Category",v:(cats.length?cats:["general"]).join(" · ")},{k:"Format",v:set.format||"detailed"}];
+  if(set.target&&set.target!=="Any")p.push({k:"Target model",v:set.target});
+  if(set.showSkills)p.push({k:"Skills lassoed",v:skills,skills:true});
+  return p;
+}
+/* Turbo meta-prompt */
+function buildMeta(task,skills,ctx,a,cats,set){
+  const ans=Object.keys(a).filter(k=>a[k]).map(k=>"- "+k+": "+a[k]).join("\n")||"- (none)";
+  const cx=Object.keys(ctx).filter(k=>ctx[k]).map(k=>"- "+k+": "+ctx[k]).join("\n")||"- (none)";
+  const fmt=set.format||"detailed";
+  if(cats.includes("image")){
+    const motion=/sora|video/i.test(a.platform||"")||VID_KW.some(k=>has(task.toLowerCase(),k));
+    return `You are an elite ${motion?"video/motion":"image"}-generation prompt engineer. Turn the user's rough request into ONE outstanding ${motion?"video/GIF":"image"} prompt that yields a stunning result.
+
+Best practices for ${motion?"video/motion":"image"} prompts:
+- Lead with a vivid, specific description of the ${motion?"subject and its action/motion":"subject and scene"}.
+- Specify visual STYLE (e.g. photorealistic, cinematic, 3D render, anime, watercolor).
+- Specify composition/framing, lighting, mood, color palette, and level of detail.
+${motion?"- Describe camera movement and pacing; note if it should loop seamlessly; suggest ~5s duration.":"- Add quality boosters (highly detailed, sharp focus, high resolution)."}
+- Provide a NEGATIVE prompt section (what to avoid: blurry, distorted, extra limbs, watermark, text…).
+- Give the exact format for the chosen tool: Midjourney uses comma descriptors + parameters (--ar, --v, --style); DALL·E 3 / Imagen / Sora read a natural-language paragraph; Stable Diffusion uses tag-style positive + negative prompts + settings.
+- Include the aspect ratio. Use bracket placeholders [like this] only for genuinely unknown specifics.
+
+Tool: ${a.platform||"Any (give a natural-language prompt plus per-tool notes)"}.
+
+ROUGH REQUEST: """${task}"""
+
+USER'S CLARIFICATIONS:
+${ans}
+
+ADDITIONAL CONTEXT:
+${cx}
+
+Output ONLY the final ${motion?"video/GIF":"image"} prompt in clean Markdown (use ## headings like "Image prompt", "Negative prompt", "Settings"). Do not explain it. Do not wrap it in code fences.`;
+  }
+  const fmtNote=fmt==="template"?"Make it a reusable TEMPLATE with {{placeholders}} for the variable parts."
+    :fmt==="agent"?"Make it a reusable AGENT system prompt (Role, Mission, Operating principles, Guardrails, Output style)."
+    :fmt==="concise"?"Keep it tight but complete."
+    :"Make it richly detailed and well-structured.";
+  return `You are an elite prompt engineer. Rewrite the user's rough request into ONE exceptional, highly detailed prompt that will get the best possible result from an AI assistant.
+
+Apply prompt-engineering best practices:
+- Assign a specific expert role/persona with relevant credentials.
+- Give rich context and state the precise objective.
+- Decompose the task and lay out a clear step-by-step method.
+- Instruct the model to think step by step, and to ask clarifying questions if a critical detail is missing (otherwise state assumptions).
+- Give explicit requirements (do) and constraints (avoid).
+- Specify an exact output format, structure, and length.
+- Define a concrete quality bar / success criteria.
+- Use bracket placeholders [like this] for any specifics the user did not provide.
+- Include a brief illustrative example only if it genuinely helps.
+${fmtNote}
+Keep it portable across ChatGPT, Claude, and Gemini${set.target&&set.target!=="Any"?" (optimize lightly for "+set.target+")":""}.
+
+ROUGH REQUEST: """${task}"""
+
+USER'S CLARIFICATIONS:
+${ans}
+
+ADDITIONAL CONTEXT:
+${cx}
+${set.appendSkills&&skills.length?`\nAt the very end, add one line: "If running in Claude Code, leverage: ${skills.join(", ")}."`:""}
+
+Output ONLY the final prompt in clean Markdown. Do not explain it. Do not wrap it in code fences.`;
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function inlineMd(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/(\{\{[^}]+\}\})/g,'<span class="v">$1</span>').replace(/(^|\s)(\/[a-z0-9:-]+)/g,'$1<code>$2</code>');}
+function mdToHtml(t){
+  const lines=t.split("\n");let html="",ul=false,ol=false;
+  const closeUl=()=>{if(ul){html+="</ul>";ul=false;}},closeOl=()=>{if(ol){html+="</ol>";ol=false;}};
+  for(const raw of lines){
+    const line=raw.replace(/\s+$/,"");
+    if(!line.trim()){closeUl();closeOl();continue;}
+    if(line==="---"){closeUl();closeOl();html+="<hr>";continue;}
+    if(line.startsWith("## ")){closeUl();closeOl();html+="<h4>"+esc(line.slice(3))+"</h4>";continue;}
+    if(line.startsWith("# ")){closeUl();closeOl();html+="<h4>"+esc(line.slice(2))+"</h4>";continue;}
+    if(/^\d+\.\s/.test(line.trim())){closeUl();if(!ol){html+="<ol>";ol=true;}html+="<li>"+inlineMd(line.trim().replace(/^\d+\.\s/,""))+"</li>";continue;}
+    if(/^[-*]\s/.test(line.trim())){closeOl();if(!ul){html+="<ul>";ul=true;}html+="<li>"+inlineMd(line.trim().replace(/^[-*]\s(\[ \]\s)?/,""))+"</li>";continue;}
+    closeUl();closeOl();html+="<p>"+inlineMd(line)+"</p>";
+  }
+  closeUl();closeOl();return html;
+}
+/* ════════════ PURE-END ════════════ */
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],ce=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
+const state={mode:"detailed",task:"",cats:[],comp:new Set(),skills:[],answers:{},context:{background:"",audience:"",constraints:"",examples:""},
+  settings:{target:"Any",format:"detailed",length:"Auto",showSkills:true,appendSkills:false,turbo:true,apiKey:"",apiModel:"claude-3-5-sonnet-latest"},
+  versions:[],current:null,qlist:[],busy:false,attachments:[]};
+const EXAMPLES=["Write a cold email a busy CEO will actually answer","Design a landing page that converts for my SaaS","Midjourney prompt for a cozy cabin in falling snow","Plan a user-notifications feature (email + in-app)","Research the best CRM for a 10-person startup","Turn my messy notes into a polished investor update"];
+
+const exBox=$("#examples");EXAMPLES.forEach(x=>{const c=ce("span","chip-ex");c.textContent=x;c.onclick=()=>{$("#task").value=x;$("#task").focus();};exBox.appendChild(c);});
+
+function start(){
+  const task=$("#task").value.trim();if(!task){toast("A prompt first, if you please");return;}
+  state.task=task;$("#lazy").value=task;
+  const d=detect(task);state.cats=d.cats;state.comp=d.comp;
+  state.skills=d.scored.slice(0,5).map(x=>x.s.id);if(!state.skills.length)state.skills=["/plan","/verify"];
+  // fresh prompt → clear all carried-over inputs (answers + context + versions)
+  state.answers={};state.versions=[];state.current=null;
+  state.context={background:"",audience:"",constraints:"",examples:""};
+  $$("[data-ctx]").forEach(el=>el.value="");
+  state.qlist=buildQuestions(state.cats);
+  $("#landing").style.display="none";$("#workspace").classList.add("show");$("#floatbar").style.display="flex";
+  setMP("prompt");closeDrawer();
+  renderQuestions();regenerate(true);
+  if(state.settings.turbo&&state.settings.apiKey)turboGenerate();
+}
+function regenerate(pushV){
+  if(state.busy)return;
+  const out=build(state.task,state.skills,ctxA(),state.answers,state.cats,state.settings);
+  state.current=out;renderRight(out);updateCounter();
+  if(pushV||!state.versions.length||state.versions[state.versions.length-1].text!==out.text){state.versions.push({n:state.versions.length+1,title:out.title,text:out.text,turbo:false});renderVersions();}
+}
+async function turboGenerate(){
+  if(!state.settings.apiKey){toast("Add your API key in Settings → Turbo");switchTab("settings");return;}
+  if(state.busy)return; state.busy=true; setBusy(true);
+  let meta=buildMeta(state.task,state.skills,ctxA(),state.answers,state.cats,state.settings);
+  const imgs=state.attachments.filter(a=>a.kind==="image");
+  if(imgs.length)meta+="\n\nThe user attached "+imgs.length+" image(s) below as visual reference — use what they depict as context for the prompt.";
+  const content=[{type:"text",text:meta}];
+  imgs.forEach(im=>{const m=(im.dataUrl||"").match(/^data:(.*?);base64,(.*)$/);if(m)content.push({type:"image",source:{type:"base64",media_type:m[1],data:m[2]}});});
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+      headers:{"content-type":"application/json","x-api-key":state.settings.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:state.settings.apiModel||"claude-3-5-sonnet-latest",max_tokens:2000,messages:[{role:"user",content:content}]})});
+    if(!res.ok){const t=await res.text();throw new Error(res.status+" — "+t.slice(0,160));}
+    const data=await res.json();
+    let text=(data.content||[]).map(c=>c.text||"").join("").trim().replace(/^```(markdown)?\n?/,"").replace(/\n?```$/,"");
+    const out={title:makeTitle(state.task),text,props:propsFor(state.cats,state.skills,state.settings).concat([{k:"Engine",v:"⚡ Turbo ("+(state.settings.apiModel||"claude")+")"}]),skills:state.skills};
+    state.current=out;renderRight(out);state.versions.push({n:state.versions.length+1,title:out.title,text:out.text,turbo:true});renderVersions();
+    toast("Polished to a shine ✨");
+  }catch(e){toast("Turbo failed: "+e.message);console.error(e);renderRight(state.current);}
+  state.busy=false;setBusy(false);
+}
+function setBusy(on){
+  const btns=[$("#turboBtn"),$("#improveBtn")];btns.forEach(b=>b&&(b.style.opacity=on?".5":"1"));
+  if(on)$("#prose").innerHTML='<div class="busy"><span class="spinner"></span>The butler is polishing your prompt…</div>';
+}
+function renderRight(out){
+  $("#genTitle").textContent=out.title;$("#crumbTitle").textContent=out.title;
+  const pt=$("#proptable");pt.innerHTML="";
+  out.props.forEach(p=>{const r=ce("div","pr"),k=ce("div","pk");k.textContent=p.k;const v=ce("div","pv");
+    if(p.skills){v.innerHTML=p.v.map(s=>"<code>"+s+"</code>").join("");}else v.textContent=p.v;r.appendChild(k);r.appendChild(v);pt.appendChild(r);});
+  $("#propsSummary").textContent="Show "+out.props.length+" properties";
+  $("#prose").innerHTML=mdToHtml(out.text);$("#copyBtn").dataset.raw=out.text;
+}
+function updateCounter(){const ans=state.qlist.filter(q=>state.answers[q.id]!==undefined&&state.answers[q.id]!=="").length;$("#counter").textContent=ans+"/"+state.qlist.length;}
+function renderQuestions(){
+  const box=$("#questions");box.innerHTML="";
+  state.qlist.forEach(q=>{
+    const card=ce("div","qcard");if(state.answers[q.id])card.classList.add("answered");
+    const badge=ce("span","badge "+q.p);badge.textContent=q.p==="High"?"High Priority":q.p==="Mid"?"Mid Priority":"Critical";card.appendChild(badge);
+    const qq=ce("div","qq");qq.innerHTML="<span>"+esc(q.q)+"</span><span class='chev'>›</span>";card.appendChild(qq);
+    const why=ce("div","qwhy");why.textContent=q.why;card.appendChild(why);
+    const ab=ce("div","answerbox");
+    if(q.opts&&q.opts.length){
+      const opts=ce("div","qopts");
+      q.opts.forEach((o,i)=>{const b=ce("button","qopt"+(i===q.rec?" rec":""));b.type="button";b.textContent=o;
+        b.setAttribute("aria-pressed",state.answers[q.id]===o?"true":"false");
+        b.onclick=e=>{e.stopPropagation();opts.querySelectorAll(".qopt").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed","true");state.answers[q.id]=o;card.classList.add("answered");regenerate();};
+        opts.appendChild(b);});
+      ab.appendChild(opts);
+    }
+    const free=ce("input","qfree");free.type="text";free.placeholder=q.opts&&q.opts.length?"…or type your own":"Type your answer";
+    if(state.answers[q.id]&&!(q.opts||[]).includes(state.answers[q.id]))free.value=state.answers[q.id];
+    free.onclick=e=>e.stopPropagation();
+    free.oninput=()=>{state.answers[q.id]=free.value;if(free.value){card.classList.add("answered");ab.querySelectorAll(".qopt").forEach(x=>x.setAttribute("aria-pressed","false"));}else card.classList.remove("answered");};
+    free.onchange=()=>regenerate();
+    ab.appendChild(free);card.appendChild(ab);
+    card.onclick=()=>card.classList.toggle("open");
+    box.appendChild(card);
+  });
+  updateCounter();
+}
+function renderVersions(){
+  const box=$("#verlist");box.innerHTML="";
+  if(!state.versions.length){box.innerHTML="<p style='color:var(--ink-3);font-size:.85rem'>No versions yet.</p>";return;}
+  state.versions.slice().reverse().forEach(v=>{
+    const it=ce("div","veritem"+(state.current&&state.current.text===v.text?" cur":""));
+    it.innerHTML="<span class='vt'>V"+v.n+(v.turbo?" ⚡":"")+" · "+esc(v.title)+"</span><span class='vm'>"+(state.current&&state.current.text===v.text?"current":"view")+"</span>";
+    it.onclick=()=>{state.current={title:v.title,text:v.text,props:state.current.props,skills:state.skills};renderRight(state.current);renderVersions();switchTab("inputs");};
+    box.appendChild(it);
+  });
+}
+function switchTab(name){$$(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name?"true":"false"));$$(".tabpane").forEach(p=>p.classList.toggle("active",p.dataset.pane===name));}
+$$(".tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+$$("[data-ctx]").forEach(el=>{el.addEventListener("input",()=>{state.context[el.dataset.ctx]=el.value;});el.addEventListener("change",()=>regenerate());});
+$$("[data-set]").forEach(el=>el.addEventListener("change",()=>{const k=el.dataset.set;state.settings[k]=el.type==="checkbox"?el.checked:el.value;persistTurbo();syncSettingsUI();if(k!=="apiKey"&&k!=="apiModel")regenerate();}));
+$("#lazy").addEventListener("change",()=>{state.task=$("#lazy").value.trim();const d=detect(state.task);state.cats=d.cats;state.comp=d.comp;state.skills=d.scored.slice(0,5).map(x=>x.s.id);if(!state.skills.length)state.skills=["/plan","/verify"];state.qlist=buildQuestions(state.cats);renderQuestions();regenerate(true);});
+
+$("#giddy").onclick=start;
+$("#task").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")start();});
+$("#improveBtn").onclick=()=>{regenerate();setMP("prompt");toast("Refined with your answers");$("#prose").scrollIntoView({behavior:"smooth",block:"center"});};
+$("#turboBtn").onclick=()=>{setMP("prompt");turboGenerate();};
+$("#copyBtn").onclick=()=>navigator.clipboard.writeText($("#copyBtn").dataset.raw||"").then(()=>toast("Copied, sir"));
+/* mobile: slide-in drawer + Inputs/Prompt pane toggle */
+function closeDrawer(){$(".app").classList.remove("drawer");}
+$("#hamburger").onclick=()=>$(".app").classList.toggle("drawer");
+$("#backdrop").onclick=closeDrawer;
+function setMP(which){const w=$("#workspace");w.classList.remove("mp-inputs","mp-prompt");w.classList.add("mp-"+which);$$("#mtoggle button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mp===which?"true":"false"));}
+$$("#mtoggle button").forEach(b=>b.onclick=()=>setMP(b.dataset.mp));
+
+/* ── Attachments (files & images → extra context) ── */
+const MAX_TEXT=8000;
+function readFile(f){return new Promise(res=>{const r=new FileReader();
+  if((f.type||"").startsWith("image/")){r.onload=()=>res({name:f.name,kind:"image",mime:f.type,dataUrl:String(r.result)});r.onerror=()=>res(null);r.readAsDataURL(f);}
+  else{r.onload=()=>{let t=String(r.result||"");if(t.length>MAX_TEXT)t=t.slice(0,MAX_TEXT)+"\n…[truncated]";res({name:f.name,kind:"text",text:t});};r.onerror=()=>res(null);r.readAsText(f);}});}
+async function addFiles(list){
+  for(const f of Array.from(list)){ if(state.attachments.length>=8){toast("Up to 8 attachments");break;} const a=await readFile(f); if(a)state.attachments.push(a); }
+  renderAttachments(); if($("#workspace").classList.contains("show"))regenerate();
+}
+function renderAttachments(){
+  ["#attachChips","#attachChipsLanding"].forEach(sel=>{const box=$(sel);if(!box)return;box.innerHTML="";
+    state.attachments.forEach((a,i)=>{const c=ce("span","attchip");
+      if(a.kind==="image"){const im=ce("img");im.src=a.dataUrl;im.alt="";c.appendChild(im);}else{const ic=ce("span","fi");ic.textContent="📄";c.appendChild(ic);}
+      const nm=ce("span","nm");nm.textContent=a.name;c.appendChild(nm);
+      const rm=ce("span","rm");rm.textContent="×";rm.title="Remove";rm.onclick=e=>{e.stopPropagation();state.attachments.splice(i,1);renderAttachments();if($("#workspace").classList.contains("show"))regenerate();};
+      c.appendChild(rm);box.appendChild(c);});});
+}
+function attachText(){
+  if(!state.attachments.length)return "";
+  return state.attachments.map(a=>a.kind==="text"?("File “"+a.name+"”:\n"+a.text):("Image attached: “"+a.name+"” — use it as visual reference.")).join("\n\n");
+}
+function ctxA(){const c=Object.assign({},state.context);const t=attachText();if(t)c.attachments=t;return c;}
+$("#fileInput").addEventListener("change",e=>{addFiles(e.target.files);e.target.value="";});
+if($("#attachLanding"))$("#attachLanding").onclick=()=>$("#fileInput").click();
+if($("#attachCtx"))$("#attachCtx").onclick=()=>$("#fileInput").click();
+$("#newBtn").onclick=()=>{
+  state.task="";state.answers={};state.versions=[];state.current=null;state.cats=[];state.skills=[];
+  state.context={background:"",audience:"",constraints:"",examples:""};state.attachments=[];renderAttachments();
+  $$("[data-ctx]").forEach(el=>el.value="");$("#lazy").value="";
+  $("#workspace").classList.remove("show");$("#floatbar").style.display="none";$("#landing").style.display="flex";
+  $("#task").value="";$("#task").focus();$("#crumbTitle").textContent="New Prompt";closeDrawer();
+};
+$("#shareBtn").onclick=()=>navigator.clipboard.writeText($("#copyBtn").dataset.raw||"").then(()=>toast("Prompt copied to share"));
+$("#saveBtn").onclick=saveCurrent;
+$("#libBtn").onclick=()=>{switchTab("versions");setMP("inputs");closeDrawer();toast("Saved prompts are in Recent");};
+
+function syncSettingsUI(){
+  const on=state.settings.turbo&&state.settings.apiKey;
+  $("#turbopill").classList.toggle("on",!!on);
+  $("#turboBtn").style.display=on?"flex":"none";
+}
+function persistTurbo(){try{localStorage.setItem("pb_turbo",JSON.stringify({turbo:state.settings.turbo,apiKey:state.settings.apiKey,apiModel:state.settings.apiModel}));}catch(e){}}
+function restoreTurbo(){try{const t=JSON.parse(localStorage.getItem("pb_turbo")||"{}");Object.assign(state.settings,t);$$("[data-set]").forEach(el=>{const k=el.dataset.set;if(k in t){if(el.type==="checkbox")el.checked=!!t[k];else el.value=t[k];}});}catch(e){}}
+
+function lib(){try{return JSON.parse(localStorage.getItem("pb_lib")||"[]");}catch(e){return[];}}
+function saveCurrent(){
+  if(!state.current){toast("Refine a prompt first");return;}
+  const arr=lib();arr.unshift({title:state.current.title,task:state.task,answers:state.answers,context:state.context,settings:Object.assign({},state.settings,{apiKey:""}),text:state.current.text});
+  localStorage.setItem("pb_lib",JSON.stringify(arr.slice(0,40)));renderSaved();toast("Saved to the Study 📚");
+}
+function renderSaved(){
+  const box=$("#savedlist");box.innerHTML="";const arr=lib();
+  if(!arr.length){box.innerHTML="<div style='font-size:.8rem;color:var(--ink-3);padding:8px 11px'>No saved prompts yet.</div>";return;}
+  arr.forEach(item=>{const b=ce("button","saveditem");b.textContent=item.title;b.title=item.task;b.onclick=()=>loadSaved(item);box.appendChild(b);});
+}
+function loadSaved(item){
+  state.task=item.task;state.answers=item.answers||{};state.context=Object.assign({background:"",audience:"",constraints:"",examples:""},item.context||{});
+  Object.assign(state.settings,item.settings||{});
+  const d=detect(state.task);state.cats=d.cats;state.comp=d.comp;state.skills=d.scored.slice(0,5).map(x=>x.s.id);if(!state.skills.length)state.skills=["/plan","/verify"];
+  state.qlist=buildQuestions(state.cats);state.versions=[];state.attachments=[];renderAttachments();
+  $("#lazy").value=state.task;
+  $$("[data-ctx]").forEach(el=>el.value=state.context[el.dataset.ctx]||"");
+  $$("[data-set]").forEach(el=>{const k=el.dataset.set;if(el.type==="checkbox")el.checked=!!state.settings[k];else if(state.settings[k]!==undefined)el.value=state.settings[k];});
+  $("#landing").style.display="none";$("#workspace").classList.add("show");$("#floatbar").style.display="flex";
+  renderQuestions();regenerate(true);switchTab("inputs");syncSettingsUI();setMP("prompt");closeDrawer();
+}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* Rocco — the raccoon butler mascot (user-supplied artwork) */
+$("#logoCoon").innerHTML='<img src="rocco.png" alt="Rocco" class="roccologo">';
+$("#mascotCoon").innerHTML='<img src="rocco.png" alt="Rocco the raccoon butler" class="roccoimg">';
+
+restoreTurbo();syncSettingsUI();renderSaved();
+</script>
+</body>
+</html>
