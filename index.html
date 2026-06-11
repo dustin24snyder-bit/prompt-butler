@@ -95,6 +95,16 @@
   .painters button[aria-pressed=true] b{color:var(--gold)}
   .painters button[aria-pressed=true] span{color:oklch(75% 0.02 85)}
   .painters b{font-size:.78rem;color:var(--ink)} .painters span{font-size:.62rem;color:var(--ink-3);font-weight:600}
+  .easelopts{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .easelopts label{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:700;color:var(--ink-2)}
+  .easelopts select{border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;font-family:var(--sans);font-size:.84rem;background:#fff;color:var(--ink)}
+  .easelopts select:focus{outline:none;border-color:var(--gold)}
+  .img-stage.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:8px;align-items:stretch}
+  .img-stage .cell{position:relative;min-height:140px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .img-stage .cell img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:.15s}
+  .img-stage .cell img:hover{filter:brightness(1.05)}
+  .img-stage .cell.sel{outline:3px solid var(--gold-d);outline-offset:-3px}
+  .img-stage .cell .mini{position:absolute;bottom:6px;right:6px;background:oklch(20% 0.02 265/.7);color:#fff;font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:6px;pointer-events:none}
   /* inline translate bar */
   .langbar{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 14px;padding:11px 12px;border:1px dashed var(--gold);border-radius:12px;background:var(--gold-bg)}
   .langbar.show{display:flex}
@@ -545,10 +555,14 @@
         </div>
         <div class="easel" id="easel">
           <div class="painters" id="painters">
-            <button data-painter="instant"><b>⚡ Instant</b><span>in-browser</span></button>
-            <button data-painter="perchance"><b>🦄 Perchance</b><span>variety · free</span></button>
+            <button data-painter="instant"><b>⚡ Instant</b><span>in-browser · variety</span></button>
+            <button data-painter="perchance"><b>🦄 Perchance</b><span>their site · free</span></button>
             <button data-painter="chatgpt"><b>💬 ChatGPT</b><span>your account</span></button>
             <button data-painter="bing"><b>🖼 Bing</b><span>Microsoft · free</span></button>
+          </div>
+          <div class="easelopts" id="easelopts">
+            <label>Art style <select id="styleSel"></select></label>
+            <label>Variations <select id="variantSel"><option value="1">1</option><option value="2" selected>2</option><option value="4">4</option></select></label>
           </div>
           <div class="img-stage" id="imgStage"></div>
           <div class="actions" style="margin-top:10px">
@@ -1400,23 +1414,74 @@ function imgDims(){
   return [1344,768];
 }
 let imgUrl="";
-function paint(){
-  const p=imgSeedPrompt(); const [w,h]=imgDims(); const seed=Math.floor(Math.random()*999999);
-  imgUrl="https://image.pollinations.ai/prompt/"+encodeURIComponent(p)+"?width="+w+"&height="+h+"&seed="+seed+"&nologo=true";
+/* Perchance-style art presets — each is a curated keyword bundle, just like theirs */
+const ART_STYLES=[
+  ["none","No style",""],
+  ["cine","Cinematic","cinematic, dramatic lighting, film still, 35mm photo"],
+  ["casual","Casual Photo","casual photography, candid, natural lighting, realistic"],
+  ["anime","Anime","anime style, vibrant colors, clean lines, detailed"],
+  ["painted","Painted Anime","painted anime, soft painterly brush strokes, atmospheric"],
+  ["digital","Digital Painting","digital painting, concept art, detailed, artstation quality"],
+  ["water","Watercolor","watercolor painting, soft washes, paper texture"],
+  ["render","3D Render","3d render, octane render, high detail, soft studio lighting"],
+  ["pixel","Pixel Art","pixel art, 16-bit, crisp pixels, charming"],
+  ["vintage","Vintage Photo","vintage photograph, film grain, faded colors, 1970s"]
+];
+(function(){const s=$("#styleSel");ART_STYLES.forEach(([v,label])=>{const o=ce("option");o.value=v;o.textContent=label;s.appendChild(o);});
+  try{s.value=localStorage.getItem("pb_style")||"none";$("#variantSel").value=localStorage.getItem("pb_variants")||"2";}catch(e){}
+  s.onchange=()=>{try{localStorage.setItem("pb_style",s.value);}catch(e){}};
+  $("#variantSel").onchange=()=>{try{localStorage.setItem("pb_variants",$("#variantSel").value);}catch(e){}};
+})();
+function styledPrompt(){
+  const found=ART_STYLES.find(x=>x[0]===$("#styleSel").value);
+  const add=found?found[2]:"";
+  return imgSeedPrompt()+(add?", "+add:"");
+}
+function loadVariant(cell,url){
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>{cell.innerHTML="";cell.appendChild(im);res(true);};
+    im.onerror=()=>res(false);
+    im.src=url;im.alt="Generated image variation";
+  });
+}
+async function paint(){
+  const n=parseInt($("#variantSel").value,10)||1;
+  const p=styledPrompt(); const [w,h]=imgDims();
   const stage=$("#imgStage");
-  stage.innerHTML='<div class="busy" style="justify-content:center"><span class="spinner"></span>Rocco is painting…</div>';
+  stage.classList.toggle("grid",n>1);
+  stage.innerHTML="";
+  const cells=[];
+  for(let i=0;i<n;i++){const c=ce("div","cell");c.innerHTML='<div class="busy" style="justify-content:center;padding:10px"><span class="spinner"></span></div>';stage.appendChild(c);cells.push(c);}
   document.body.classList.add("working");
-  const im=new Image();
-  im.onload=()=>{stage.innerHTML="";stage.appendChild(im);document.body.classList.remove("working");toast("Fresh off the easel 🎨");};
-  im.onerror=()=>{
-    document.body.classList.remove("working");
-    stage.innerHTML='<div style="padding:22px 16px;text-align:center"><p style="margin:0 0 6px;font-weight:700">The free easel is busy right now.</p>'+
-      '<p style="margin:0 0 14px;font-size:.84rem;color:var(--ink-3)">Happens at peak times — try Repaint in a moment, or paint it free with Bing:</p>'+
-      '<button class="act primary" id="bingGo" style="display:inline-block">🖼 Open in Bing Image Creator</button></div>';
-    const bg=stage.querySelector("#bingGo");
-    if(bg)bg.onclick=()=>window.open("https://www.bing.com/images/create?q="+encodeURIComponent(imgSeedPrompt()),"_blank","noopener");
-  };
-  im.src=imgUrl; im.alt="Generated image";
+  imgUrl="";let painted=0;
+  for(let i=0;i<n;i++){
+    const seed=Math.floor(Math.random()*999999);
+    const url="https://image.pollinations.ai/prompt/"+encodeURIComponent(p)+"?width="+w+"&height="+h+"&seed="+seed+"&nologo=true";
+    const ok=await loadVariant(cells[i],url); /* sequential — the free queue allows 1 at a time */
+    if(ok){
+      painted++;
+      if(!imgUrl){imgUrl=url;cells[i].classList.add("sel");}
+      const tag=ce("span","mini");tag.textContent="v"+(i+1);cells[i].appendChild(tag);
+      cells[i].querySelector("img").onclick=()=>{$$("#imgStage .cell").forEach(x=>x.classList.remove("sel"));cells[i].classList.add("sel");imgUrl=url;toast("Variation "+(i+1)+" selected");};
+    }else{
+      cells[i].innerHTML='<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink-3)">busy — try Repaint</div>';
+      if(painted===0&&i===0){ /* engine down entirely → offer the rescue once */
+        stage.classList.remove("grid");
+        stage.innerHTML='<div style="padding:22px 16px;text-align:center"><p style="margin:0 0 6px;font-weight:700">The free easel is busy right now.</p>'+
+          '<p style="margin:0 0 14px;font-size:.84rem;color:var(--ink-3)">Try Repaint in a moment — or paint it now, free:</p>'+
+          '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+
+          '<button class="act primary" id="bingGo">🖼 Bing Creator</button>'+
+          '<button class="act ghost" id="perchGo">🦄 Perchance (prompt copied)</button></div></div>';
+        const bg=stage.querySelector("#bingGo"),pg=stage.querySelector("#perchGo");
+        if(bg)bg.onclick=()=>window.open("https://www.bing.com/images/create?q="+encodeURIComponent(p),"_blank","noopener");
+        if(pg)pg.onclick=()=>{copyText(p);window.open("https://perchance.org/ai-text-to-image-generator","_blank","noopener");};
+        break;
+      }
+    }
+  }
+  document.body.classList.remove("working");
+  if(painted>0)toast(painted>1?painted+" fresh takes off the easel 🎨":"Fresh off the easel 🎨");
 }
 /* painter hub — remembers the favorite, paints without popups */
 function getPainter(){try{return localStorage.getItem("pb_painter")||"instant";}catch(e){return "instant";}}
@@ -1430,7 +1495,7 @@ function showEasel(autopaint){
 }
 function paintWith(p){
   setPainter(p);
-  const seedP=imgSeedPrompt();
+  const seedP=styledPrompt();
   if(p==="instant"){paint();return;}
   copyText(seedP);
   if(p==="perchance"){window.open("https://perchance.org/ai-text-to-image-generator","_blank","noopener");stageNote("🦄 <b>Perchance is open in a new tab</b> — lovely variety over there.<br>Your prompt is already copied: paste it in and generate.");}
