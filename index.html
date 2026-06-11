@@ -52,9 +52,31 @@
   .logo{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-weight:800;font-size:1.18rem;color:var(--ink);padding:4px 6px 14px}
   .logo .ic{width:38px;height:38px;flex:none;overflow:hidden;border-radius:10px;box-shadow:0 2px 6px -2px oklch(30% 0.05 60/.4)}
   .roccologo{width:100%;height:100%;object-fit:cover;object-position:50% 16%;display:block}
-  .mascot{margin:0 auto 10px;height:180px;display:flex;justify-content:center;animation:bob 4.5s var(--ease) infinite}
-  .roccoimg{height:180px;width:auto;border-radius:22px;display:block;box-shadow:0 18px 34px -14px oklch(28% 0.06 60/.5)}
+  /* ── Animated Rocco ── */
+  .mascot{position:relative;margin:0 auto 14px;height:190px;width:190px;display:flex;justify-content:center;align-items:flex-end}
+  .roccoimg{height:180px;width:auto;border-radius:22px;display:block;animation:r-float 5.2s ease-in-out infinite;transform-origin:50% 90%;will-change:transform;cursor:pointer}
+  .mascot:hover .roccoimg,body.working .roccoimg{animation:r-wiggle .55s ease-in-out infinite}
+  .mascot .shadow{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:120px;height:16px;border-radius:50%;background:oklch(40% 0.05 60/.28);filter:blur(5px);animation:r-shadow 5.2s ease-in-out infinite}
+  .spark{position:absolute;font-size:1rem;color:var(--gold-d);pointer-events:none;opacity:0;animation:r-twinkle 3.4s ease-in-out infinite}
+  .spark.s1{top:8%;left:-4%;animation-delay:0s}
+  .spark.s2{top:0%;right:-2%;font-size:1.25rem;animation-delay:1.1s}
+  .spark.s3{bottom:26%;left:-12%;font-size:.8rem;animation-delay:2s}
+  .spark.s4{bottom:34%;right:-10%;animation-delay:2.7s}
+  @keyframes r-float{0%,100%{transform:translateY(0) rotate(-1.5deg)}25%{transform:translateY(-9px) rotate(0deg)}50%{transform:translateY(-3px) rotate(1.6deg)}75%{transform:translateY(-11px) rotate(.3deg)}}
+  @keyframes r-shadow{0%,100%{transform:translateX(-50%) scaleX(1);opacity:.9}25%{transform:translateX(-50%) scaleX(.82);opacity:.55}50%{transform:translateX(-50%) scaleX(.94)}75%{transform:translateX(-50%) scaleX(.78);opacity:.5}}
+  @keyframes r-wiggle{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-5px)}}
+  @keyframes r-twinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0deg)}45%{opacity:1;transform:scale(1.15) rotate(22deg)}70%{opacity:.5;transform:scale(.85) rotate(40deg)}}
   @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+  .g-spark{display:inline-block;animation:r-twinkle 2.6s ease-in-out infinite}
+  .transhint{display:none;justify-content:center;margin:10px 0 2px}
+  .transhint.show{display:flex}
+  .transhint button{all:unset;cursor:pointer;font-size:.82rem;font-weight:700;color:var(--gold-d);background:var(--gold-bg);border:1px dashed var(--gold);padding:9px 14px;border-radius:10px;transition:.15s}
+  .transhint button:hover{background:var(--gold);color:#fff}
+  .services{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+  .services button{all:unset;cursor:pointer;font-weight:700;font-size:.84rem;color:var(--ink);background:var(--gold-bg);border:1px solid var(--gold);padding:9px 14px;border-radius:10px;transition:.16s var(--ease)}
+  .services button:hover{background:var(--gold-d);color:#fff;transform:translateY(-1px)}
+  .img-stage{min-height:230px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .img-stage img{width:100%;height:auto;display:block}
   .navbtn{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;font-weight:600;font-size:.9rem;color:var(--ink-2);transition:.15s}
   .navbtn:hover{background:var(--gold-bg);color:var(--gold-d)}
   .navbtn.primary{background:var(--ink);color:#fff} .navbtn.primary:hover{background:var(--gold-d);color:#fff}
@@ -333,12 +355,10 @@
         <p class="sub">Hand me a rough idea, and I shall return an exhaustively detailed prompt — for tasks, workflows, or image generation — portable to ChatGPT, Claude &amp; Gemini.</p>
         <div class="entry">
           <textarea id="task" placeholder="Your rough request, sir…  e.g. “write a cold email a busy CEO will actually answer”"></textarea>
-          <div class="examples" id="examples"></div>
-          <div class="attachrow"><button class="attachbtn" id="attachLanding" type="button">📎 Attach files or images</button></div>
-          <div class="attachchips" id="attachChipsLanding"></div>
-          <button class="giddy" id="giddy">Upgrade Prompt&nbsp;→</button>
+          <div class="transhint" id="transHint"><button id="transGo" type="button">🌐 Looks like another language — translate &amp; polish it</button></div>
+          <button class="giddy" id="giddy"><span class="g-spark">✨</span> Polish My Prompt</button>
           <div class="quicksend">
-            <span class="qs-label">…or upgrade &amp; send straight to</span>
+            <span class="qs-label">…or polish &amp; send straight to</span>
             <div class="qs-tools">
               <button data-qs="chatgpt"><span class="ic gpt"></span>ChatGPT</button>
               <button data-qs="claude"><span class="ic cla"></span>Claude</button>
@@ -380,7 +400,7 @@
         <div class="feat-grid">
           <div class="featcard"><span class="f-ic">🧠</span><h3>Skill-aware</h3><p>179 built-in skills mapped to your task and woven in for sharper, deeper results.</p></div>
           <div class="featcard"><span class="f-ic">🎨</span><h3>Image &amp; GIF mode</h3><p>Tailored prompts for Midjourney, DALL·E, Stable Diffusion, Sora — with negative prompts &amp; settings.</p></div>
-          <div class="featcard"><span class="f-ic">📎</span><h3>Attach context</h3><p>Drop in files or images and Rocco grounds the prompt in your real material.</p></div>
+          <div class="featcard"><span class="f-ic">🌐</span><h3>Translate &amp; create</h3><p>Polish prompts in any language, humanize the tone, and generate real images — right here, free.</p></div>
           <div class="featcard"><span class="f-ic">🔗</span><h3>Portable to any AI</h3><p>One-click open in ChatGPT, Claude, or Gemini — it remembers your favorite.</p></div>
           <div class="featcard"><span class="f-ic">🕘</span><h3>Version history</h3><p>Every refinement is saved. Jump back to any version, anytime.</p></div>
           <div class="featcard"><span class="f-ic">🆓</span><h3>Free &amp; private</h3><p>No login, no API key. Everything runs in your browser and stays on your device.</p></div>
@@ -444,11 +464,6 @@
           <div class="ctxfield"><label>Audience</label><input data-ctx="audience" type="text" placeholder="Who consumes this?"></div>
           <div class="ctxfield"><label>Constraints (must-have / must-avoid)</label><textarea data-ctx="constraints" rows="2" placeholder="Deadline, length, tools, things to avoid…"></textarea></div>
           <div class="ctxfield"><label>Examples / references to match</label><textarea data-ctx="examples" rows="2" placeholder="Paste an example, link, or describe a reference."></textarea></div>
-          <div class="ctxfield"><label>Attachments (files &amp; images)</label>
-            <div class="d" style="font-size:.74rem;color:var(--ink-3);margin-bottom:7px">Text files are read inline. Images become visual context for Turbo (Claude vision).</div>
-            <button class="attachbtn" id="attachCtx" type="button">📎 Attach files or images</button>
-            <div class="attachchips" id="attachChips"></div>
-          </div>
         </div>
 
         <div class="tabpane" data-pane="versions"><div class="verlist" id="verlist"></div></div>
@@ -484,6 +499,12 @@
             <div class="sp-note">Opens in your logged-in account. Already copied — just paste if it doesn't auto-fill.</div>
           </div>
         </div>
+        <div class="services" id="services">
+          <button data-svc="image">🎨 Create the image</button>
+          <button data-svc="humanize">🪄 Humanize</button>
+          <button data-svc="translate">🌐 Translate</button>
+          <button data-svc="coach">💬 Get coaching</button>
+        </div>
         <div class="prose" id="prose"></div>
       </div>
     </section>
@@ -505,7 +526,48 @@
     <button class="share-native" id="shareNative">Share…</button>
   </div>
 </div>
-<input type="file" id="fileInput" multiple accept="image/*,.txt,.md,.markdown,.csv,.json,.log,.html,.css,.js,.ts,.py,.yml,.yaml,.xml" style="display:none">
+<!-- Image generation modal -->
+<div class="modal" id="imgModal">
+  <div class="modal-card">
+    <button class="modal-x" id="imgClose" aria-label="Close">×</button>
+    <h3>🎨 Rocco's easel</h3>
+    <div class="img-stage" id="imgStage"><div class="busy" style="justify-content:center"><span class="spinner"></span>Rocco is painting…</div></div>
+    <div class="actions" style="justify-content:center;margin-top:14px">
+      <button class="act primary" id="imgDownload">⬇ Download</button>
+      <button class="act ghost" id="imgRegen">🎲 Repaint</button>
+    </div>
+    <p class="sp-note" style="padding:8px 4px 0">Generated free by Pollinations.ai from your polished prompt.</p>
+  </div>
+</div>
+<!-- Translate modal -->
+<div class="modal" id="transModal">
+  <div class="modal-card">
+    <button class="modal-x" id="transClose" aria-label="Close">×</button>
+    <h3>🌐 Translate the prompt</h3>
+    <p>Rocco speaks many tongues. Pick a language:</p>
+    <div class="share-url" style="margin-bottom:12px">
+      <select id="transLang" style="flex:1;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font-family:var(--sans);font-size:.9rem;background:var(--bg);color:var(--ink)">
+        <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="pt">Portuguese</option><option value="it">Italian</option><option value="zh-CN">Chinese</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option>
+      </select>
+      <button id="transDo">Translate</button>
+    </div>
+    <div id="transStatus" style="font-size:.82rem;color:var(--ink-3);min-height:18px;margin-bottom:8px"></div>
+    <button class="share-native" id="transGoogle">Open in Google Translate instead</button>
+  </div>
+</div>
+<!-- Humanize modal -->
+<div class="modal" id="humModal">
+  <div class="modal-card">
+    <button class="modal-x" id="humClose" aria-label="Close">×</button>
+    <h3>🪄 Adjust the voice</h3>
+    <p>Rewrite the prompt's tone — instantly, right here.</p>
+    <div class="actions" style="flex-direction:column;gap:8px">
+      <button class="act primary" style="width:100%;box-sizing:border-box;text-align:center" data-hum="human">😊 Humanize — warm &amp; natural</button>
+      <button class="act ghost" style="width:100%;box-sizing:border-box;text-align:center" data-hum="punchy">⚡ Shorter &amp; punchier</button>
+      <button class="act ghost" style="width:100%;box-sizing:border-box;text-align:center" data-hum="pro">👔 More professional</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ════════════ PURE-START ════════════ */
@@ -1102,9 +1164,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],ce=
 const state={mode:"detailed",task:"",cats:[],comp:new Set(),skills:[],answers:{},context:{background:"",audience:"",constraints:"",examples:""},
   settings:{target:"Any",format:"detailed",length:"Auto",showSkills:true,appendSkills:false,turbo:false,apiKey:"",apiModel:"claude-3-5-sonnet-latest"},
   versions:[],current:null,qlist:[],busy:false,attachments:[]};
-const EXAMPLES=["Write a cold email a busy CEO will actually answer","Design a landing page that converts for my SaaS","Midjourney prompt for a cozy cabin in falling snow","Plan a user-notifications feature (email + in-app)","Research the best CRM for a 10-person startup","Turn my messy notes into a polished investor update"];
 
-const exBox=$("#examples");EXAMPLES.forEach(x=>{const c=ce("span","chip-ex");c.textContent=x;c.onclick=()=>{$("#task").value=x;$("#task").focus();};exBox.appendChild(c);});
 
 function start(){
   const task=$("#task").value.trim();if(!task){toast("A prompt first, if you please");return;}
@@ -1150,6 +1210,7 @@ async function turboGenerate(){
 }
 function setBusy(on){
   const btns=[$("#turboBtn"),$("#improveBtn")];btns.forEach(b=>b&&(b.style.opacity=on?".5":"1"));
+  document.body.classList.toggle("working",!!on);
   if(on)$("#prose").innerHTML='<div class="busy"><span class="spinner"></span>The butler is polishing your prompt…</div>';
 }
 function renderRight(out){
@@ -1250,6 +1311,172 @@ $$("#tplGrid .tplcard").forEach(c=>c.onclick=()=>{
   toast("Loaded — tweak it, then Upgrade");
 });
 $("#footShare").onclick=openShare;
+
+/* ════════ Rocco's Services: create image · translate · humanize · coach ════════ */
+function currentText(){return ($("#copyBtn").dataset.raw||"").trim();}
+function setPromptText(text,label){
+  const props=(state.current&&state.current.props)||propsFor(state.cats,state.skills,state.settings);
+  state.current={title:(state.current&&state.current.title)||makeTitle(state.task),text,props,skills:state.skills};
+  renderRight(state.current);
+  state.versions.push({n:state.versions.length+1,title:state.current.title+(label?" · "+label:""),text});
+  renderVersions();
+}
+function svcModal(id,show){$(id).classList.toggle("show",!!show);}
+
+/* ── 1. Image generation (Pollinations.ai — free, no key) ── */
+function imgSeedPrompt(){
+  const a=state.answers||{};
+  if(state.cats.includes("image")){
+    const subj=imgSubject(state.task,a);
+    return [subj,(a.style||"highly detailed"),(a.mood||""),"sharp focus, professional composition"].filter(Boolean).join(", ").slice(0,420);
+  }
+  return (state.task+", highly detailed, professional, high quality").slice(0,420);
+}
+function imgDims(){
+  const r=(state.answers&&state.answers.ratio)||"";
+  if(r.indexOf("9:16")>=0)return [768,1344]; if(r.indexOf("1:1")>=0)return [1024,1024];
+  if(r.indexOf("4:3")>=0)return [1152,896]; if(r.indexOf("3:2")>=0)return [1216,832];
+  return [1344,768];
+}
+let imgUrl="";
+function paint(){
+  const p=imgSeedPrompt(); const [w,h]=imgDims(); const seed=Math.floor(Math.random()*999999);
+  imgUrl="https://image.pollinations.ai/prompt/"+encodeURIComponent(p)+"?width="+w+"&height="+h+"&seed="+seed+"&nologo=true";
+  const stage=$("#imgStage");
+  stage.innerHTML='<div class="busy" style="justify-content:center"><span class="spinner"></span>Rocco is painting…</div>';
+  document.body.classList.add("working");
+  const im=new Image();
+  im.onload=()=>{stage.innerHTML="";stage.appendChild(im);document.body.classList.remove("working");toast("Fresh off the easel 🎨");};
+  im.onerror=()=>{
+    document.body.classList.remove("working");
+    stage.innerHTML='<div style="padding:22px 16px;text-align:center"><p style="margin:0 0 6px;font-weight:700">The free easel is busy right now.</p>'+
+      '<p style="margin:0 0 14px;font-size:.84rem;color:var(--ink-3)">Happens at peak times — try Repaint in a moment, or paint it free with Bing:</p>'+
+      '<button class="act primary" id="bingGo" style="display:inline-block">🖼 Open in Bing Image Creator</button></div>';
+    const bg=stage.querySelector("#bingGo");
+    if(bg)bg.onclick=()=>window.open("https://www.bing.com/images/create?q="+encodeURIComponent(imgSeedPrompt()),"_blank","noopener");
+  };
+  im.src=imgUrl; im.alt="Generated image";
+}
+$("#imgRegen").onclick=paint;
+$("#imgClose").onclick=()=>svcModal("#imgModal",false);
+$("#imgModal").onclick=e=>{if(e.target.id==="imgModal")svcModal("#imgModal",false);};
+$("#imgDownload").onclick=async()=>{
+  if(!imgUrl)return;
+  try{const r=await fetch(imgUrl);const b=await r.blob();const u=URL.createObjectURL(b);
+    const a=ce("a");a.href=u;a.download="rocco-art.png";a.click();URL.revokeObjectURL(u);}
+  catch(e){window.open(imgUrl,"_blank","noopener");}
+};
+
+/* ── 2. Translation (MyMemory — free, no key; Google Translate fallback) ── */
+const transCache={};
+async function translateText(text,target){
+  const key=target+"::"+text;
+  if(transCache[key])return transCache[key];
+  const chunks=[];let buf="";
+  text.split("\n").forEach(line=>{
+    if((buf+"\n"+line).length>440){if(buf)chunks.push(buf);buf=line.slice(0,440);}
+    else buf=buf?buf+"\n"+line:line;
+  });
+  if(buf)chunks.push(buf);
+  const out=[];
+  for(let i=0;i<chunks.length;i++){
+    $("#transStatus").textContent="Translating… "+(i+1)+"/"+chunks.length;
+    const res=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(chunks[i])+"&langpair=autodetect|"+encodeURIComponent(target));
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const data=await res.json();
+    const t=data&&data.responseData&&data.responseData.translatedText;
+    if(!t||data.responseStatus&&data.responseStatus!==200)throw new Error((data&&data.responseDetails)||"translation failed");
+    out.push(t);
+  }
+  const joined=out.join("\n");transCache[key]=joined;return joined;
+}
+$("#transDo").onclick=async()=>{
+  const text=currentText();if(!text)return;
+  const target=$("#transLang").value;
+  document.body.classList.add("working");
+  try{
+    const t=await translateText(text,target);
+    setPromptText(t,$("#transLang").selectedOptions[0].textContent);
+    $("#transStatus").textContent="";svcModal("#transModal",false);toast("Translated, sir 🌐");
+  }catch(e){$("#transStatus").textContent="Hmm — that route failed ("+e.message+"). Try Google Translate below.";}
+  document.body.classList.remove("working");
+};
+$("#transGoogle").onclick=()=>{
+  const target=$("#transLang").value.split("-")[0];
+  window.open("https://translate.google.com/?sl=auto&tl="+target+"&text="+encodeURIComponent(currentText())+"&op=translate","_blank","noopener");
+};
+$("#transClose").onclick=()=>svcModal("#transModal",false);
+$("#transModal").onclick=e=>{if(e.target.id==="transModal")svcModal("#transModal",false);};
+
+/* ── 3. Humanizer / tone (local, instant) ── */
+const HUM_SWAPS=[[/\butilize\b/gi,"use"],[/\bleverage\b/gi,"use"],[/\bcommence\b/gi,"start"],[/\bendeavor\b/gi,"try"],[/\bfacilitate\b/gi,"help"],[/\bsubsequently\b/gi,"then"],[/\bin order to\b/gi,"to"],[/\bprior to\b/gi,"before"],[/\butilization\b/gi,"use"],[/\boptimal\b/gi,"best"],[/\bnumerous\b/gi,"many"],[/\bpurchase\b/gi,"buy"]];
+const CONTRACT=[[/\bdo not\b/g,"don't"],[/\bdoes not\b/g,"doesn't"],[/\bcannot\b/g,"can't"],[/\bwill not\b/g,"won't"],[/\bit is\b/g,"it's"],[/\bthey are\b/g,"they're"],[/\byou are\b/g,"you're"],[/\bwe are\b/g,"we're"],[/\bI am\b/g,"I'm"]];
+function humanize(mode){
+  let t=currentText();if(!t)return;
+  if(mode==="human"){
+    HUM_SWAPS.forEach(([re,sub])=>t=t.replace(re,sub));
+    CONTRACT.forEach(([re,sub])=>t=t.replace(re,sub));
+    t=t.replace(/\*\*Tone:\*\*.*$/m,"**Tone:** Warm, natural, and conversational — like a smart friend explaining it, never stiff or robotic.");
+    t+="\n\nWrite like a real person: vary sentence length, use contractions, and skip corporate buzzwords entirely.";
+    setPromptText(t,"humanized");toast("Warmed up 😊");
+  }else if(mode==="punchy"){
+    t=t.split("\n").map(l=>{
+      if(/^[-*]|^\d+\.|^#|^\*\*/.test(l.trim()))return l;
+      return l.split(/(?<=[.!?])\s+/).map(s=>s.split(" ").length>22?s.split(" ").slice(0,22).join(" ")+"…":s).join(" ");
+    }).join("\n");
+    t+="\n\nBe ruthless about brevity: short sentences, no filler, every word earns its place.";
+    setPromptText(t,"punchier");toast("Tightened ⚡");
+  }else{
+    t=t.replace(/don't/g,"do not").replace(/doesn't/g,"does not").replace(/can't/g,"cannot").replace(/won't/g,"will not").replace(/it's/g,"it is").replace(/\bI'm\b/g,"I am").replace(/they're/g,"they are").replace(/you're/g,"you are").replace(/we're/g,"we are");
+    t=t.replace(/\*\*Tone:\*\*.*$/m,"**Tone:** Polished, precise, and professional — executive-ready language throughout.");
+    setPromptText(t,"professional");toast("Suited up 👔");
+  }
+  svcModal("#humModal",false);
+}
+$$("#humModal [data-hum]").forEach(b=>b.onclick=()=>humanize(b.dataset.hum));
+$("#humClose").onclick=()=>svcModal("#humModal",false);
+$("#humModal").onclick=e=>{if(e.target.id==="humModal")svcModal("#humModal",false);};
+
+/* ── 4. Coaching — opens their AI with a coach meta-prompt ── */
+function coach(){
+  const text=currentText();if(!text)return;
+  const meta="You are an expert prompt-engineering coach. Below is a prompt I built. Briefly review it, point out its 3 biggest weaknesses, suggest concrete improvements, and ask me up to 3 clarifying questions that would make it even better.\n\n---\n\n"+text;
+  const tool=getPref()||"chatgpt";
+  window.open(toolUrl(tool,meta),"_blank","noopener");
+  copyText(meta);toast("Coach is waiting — paste if it didn't prefill");
+}
+/* services bar dispatch */
+$$("#services button[data-svc]").forEach(b=>b.onclick=()=>{
+  const s=b.dataset.svc;
+  if(!currentText()){toast("Polish a prompt first, sir");return;}
+  if(s==="image"){svcModal("#imgModal",true);paint();}
+  else if(s==="translate"){$("#transStatus").textContent="";svcModal("#transModal",true);}
+  else if(s==="humanize"){svcModal("#humModal",true);}
+  else if(s==="coach"){coach();}
+});
+
+/* ── Input-language layer: detect non-English input, offer translate & polish ── */
+function looksNonEnglish(t){
+  const letters=(t.match(/[^\s\d\p{P}]/gu)||[]);if(letters.length<6)return false;
+  const nonAscii=letters.filter(c=>c.charCodeAt(0)>127).length;
+  return nonAscii/letters.length>0.3;
+}
+$("#task").addEventListener("input",()=>{$("#transHint").classList.toggle("show",looksNonEnglish($("#task").value));});
+$("#transGo").onclick=async()=>{
+  const raw=$("#task").value.trim();if(!raw)return;
+  $("#transGo").textContent="🌐 Translating…";document.body.classList.add("working");
+  try{
+    const en=await translateText(raw,"en");
+    $("#task").value=en;$("#transHint").classList.remove("show");
+    toast("Translated to English ✓ — polishing");start();
+  }catch(e){
+    toast("Translation hiccup — opening Google Translate");
+    window.open("https://translate.google.com/?sl=auto&tl=en&text="+encodeURIComponent(raw)+"&op=translate","_blank","noopener");
+  }
+  $("#transGo").textContent="🌐 Looks like another language — translate & polish it";
+  document.body.classList.remove("working");
+};
+
 markPref();
 /* mobile: slide-in drawer + Inputs/Prompt pane toggle */
 function closeDrawer(){$(".app").classList.remove("drawer");}
@@ -1280,9 +1507,6 @@ function attachText(){
   return state.attachments.map(a=>a.kind==="text"?("File “"+a.name+"”:\n"+a.text):("Image attached: “"+a.name+"” — use it as visual reference.")).join("\n\n");
 }
 function ctxA(){const c=Object.assign({},state.context);const t=attachText();if(t)c.attachments=t;return c;}
-$("#fileInput").addEventListener("change",e=>{addFiles(e.target.files);e.target.value="";});
-if($("#attachLanding"))$("#attachLanding").onclick=()=>$("#fileInput").click();
-if($("#attachCtx"))$("#attachCtx").onclick=()=>$("#fileInput").click();
 $("#newBtn").onclick=()=>{
   state.task="";state.answers={};state.versions=[];state.current=null;state.cats=[];state.skills=[];
   state.context={background:"",audience:"",constraints:"",examples:""};state.attachments=[];renderAttachments();
@@ -1337,7 +1561,8 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");se
 
 /* Rocco — the raccoon butler mascot (user-supplied artwork) */
 $("#logoCoon").innerHTML='<img src="rocco.png" alt="Rocco" class="roccologo">';
-$("#mascotCoon").innerHTML='<img src="rocco.png" alt="Rocco the raccoon butler" class="roccoimg">';
+$("#mascotCoon").innerHTML='<span class="shadow"></span><img src="rocco.png" alt="Rocco the raccoon butler" class="roccoimg" title="Rocco, at your service">'+
+  '<span class="spark s1">✦</span><span class="spark s2">✨</span><span class="spark s3">✦</span><span class="spark s4">⭐</span>';
 
 restoreTurbo();syncSettingsUI();renderSaved();
 </script>

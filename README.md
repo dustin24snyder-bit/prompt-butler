@@ -11,7 +11,12 @@ portable prompt for ChatGPT, Claude, and Gemini. Single static page — no build
 - Detailed / Concise / Template / Agent prompt formats
 - Prioritized "improve" questions (Critical / High / Mid)
 - Image & GIF/video prompt mode (Midjourney, DALL·E, Stable Diffusion, Sora)
-- Attach files & images for extra context
+- **Rocco's services** on every polished prompt:
+  - 🎨 Create the image — free in-browser generation via Pollinations.ai (Bing Image Creator fallback)
+  - 🌐 Translate — 11 languages via the free MyMemory API (Google Translate fallback); non-English input is detected and offered an instant translate-&-polish
+  - 🪄 Humanize — instant local tone rewrites (warm / punchier / professional)
+  - 💬 Get coaching — opens your own AI with a prompt-coach meta-prompt
+- One-click open in ChatGPT / Claude / Gemini (remembers your favorite)
 - Local version history + saved-prompt library (stored in your browser)
 - Mobile-friendly + "Add to Home Screen" (PWA manifest + icons)
 - **⚡ Turbo:** optional, uses *your own* Anthropic API key (entered at runtime,
