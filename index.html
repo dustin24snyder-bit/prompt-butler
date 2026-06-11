@@ -562,6 +562,7 @@
           </div>
           <div class="easelopts" id="easelopts">
             <label>Art style <select id="styleSel"></select></label>
+            <label>Shape <select id="shapeSel"><option value="auto">Auto</option><option value="square">Square 1:1</option><option value="wide">Wide 16:9</option><option value="tall">Tall 9:16</option><option value="classic">Classic 4:3</option><option value="photo">Photo 3:2</option></select></label>
             <label>Variations <select id="variantSel"><option value="1">1</option><option value="2" selected>2</option><option value="4">4</option></select></label>
           </div>
           <div class="img-stage" id="imgStage"></div>
@@ -1408,7 +1409,10 @@ function imgSeedPrompt(){
   return (state.task+", highly detailed, professional, high quality").slice(0,420);
 }
 function imgDims(){
-  const r=(state.answers&&state.answers.ratio)||"";
+  const SHAPES={square:[1024,1024],wide:[1344,768],tall:[768,1344],classic:[1152,896],photo:[1216,832]};
+  const sEl=$("#shapeSel"),s=sEl?sEl.value:"auto";
+  if(s!=="auto"&&SHAPES[s])return SHAPES[s];           // easel Shape control wins
+  const r=(state.answers&&state.answers.ratio)||"";    // else fall back to the refine-question answer
   if(r.indexOf("9:16")>=0)return [768,1344]; if(r.indexOf("1:1")>=0)return [1024,1024];
   if(r.indexOf("4:3")>=0)return [1152,896]; if(r.indexOf("3:2")>=0)return [1216,832];
   return [1344,768];
@@ -1428,9 +1432,10 @@ const ART_STYLES=[
   ["vintage","Vintage Photo","vintage photograph, film grain, faded colors, 1970s"]
 ];
 (function(){const s=$("#styleSel");ART_STYLES.forEach(([v,label])=>{const o=ce("option");o.value=v;o.textContent=label;s.appendChild(o);});
-  try{s.value=localStorage.getItem("pb_style")||"none";$("#variantSel").value=localStorage.getItem("pb_variants")||"2";}catch(e){}
+  try{s.value=localStorage.getItem("pb_style")||"none";$("#variantSel").value=localStorage.getItem("pb_variants")||"2";$("#shapeSel").value=localStorage.getItem("pb_shape")||"auto";}catch(e){}
   s.onchange=()=>{try{localStorage.setItem("pb_style",s.value);}catch(e){}};
   $("#variantSel").onchange=()=>{try{localStorage.setItem("pb_variants",$("#variantSel").value);}catch(e){}};
+  $("#shapeSel").onchange=()=>{try{localStorage.setItem("pb_shape",$("#shapeSel").value);}catch(e){}};
 })();
 function styledPrompt(){
   const found=ART_STYLES.find(x=>x[0]===$("#styleSel").value);
@@ -1483,14 +1488,13 @@ async function paint(){
   document.body.classList.remove("working");
   if(painted>0)toast(painted>1?painted+" fresh takes off the easel 🎨":"Fresh off the easel 🎨");
 }
-/* painter hub — remembers the favorite, paints without popups */
-function getPainter(){try{return localStorage.getItem("pb_painter")||"instant";}catch(e){return "instant";}}
-function setPainter(p){try{localStorage.setItem("pb_painter",p);}catch(e){} $$("#painters button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.painter===p?"true":"false"));}
-function stageNote(html){$("#imgStage").innerHTML='<div style="padding:20px 14px;text-align:center;font-size:.86rem;color:var(--ink-2);line-height:1.55">'+html+'</div>';}
+/* painter hub — Instant paints in-app automatically; external painters open ONLY when tapped */
+function setPainter(p){$$("#painters button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.painter===p?"true":"false"));}
+function stageNote(html){$("#imgStage").classList.remove("grid");$("#imgStage").innerHTML='<div style="padding:20px 14px;text-align:center;font-size:.86rem;color:var(--ink-2);line-height:1.55">'+html+'</div>';}
 function showEasel(autopaint){
   $("#easel").classList.add("show");
-  const p=getPainter();setPainter(p);
-  if(autopaint)paintWith(p);
+  setPainter("instant");
+  if(autopaint)paint();
   $("#easel").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function paintWith(p){
@@ -1503,7 +1507,7 @@ function paintWith(p){
   else if(p==="bing"){window.open("https://www.bing.com/images/create?q="+encodeURIComponent(seedP),"_blank","noopener");stageNote("🖼 <b>Bing Image Creator is open</b> with your prompt — free with a Microsoft account.");}
 }
 $$("#painters button").forEach(b=>b.onclick=()=>paintWith(b.dataset.painter));
-$("#imgRegen").onclick=()=>paintWith(getPainter());
+$("#imgRegen").onclick=()=>{setPainter("instant");paint();};
 $("#imgDownload").onclick=async()=>{
   if(!imgUrl)return;
   try{const r=await fetch(imgUrl);const b=await r.blob();const u=URL.createObjectURL(b);
