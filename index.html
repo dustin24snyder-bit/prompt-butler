@@ -85,12 +85,24 @@
   .toolrail .tr-ic{font-size:1.45rem}
   .toolrail .tr-l{font-size:.7rem;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.25}
   .toolrail button[aria-pressed=true] .tr-l{color:var(--gold)}
-  .easelways{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-  .easelways button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center;padding:11px 6px;border-radius:11px;border:1px solid var(--line-2);background:var(--bg);transition:.15s}
-  .easelways button:hover{border-color:var(--gold);background:var(--gold-bg)}
-  .easelways b{font-size:.82rem;color:var(--ink)}
-  .easelways span{font-size:.66rem;color:var(--ink-3);font-weight:600}
-  @media(max-width:560px){.easelways{grid-template-columns:1fr}.toolrail button{width:78px}}
+  /* inline easel hub */
+  .easel{display:none;margin:0 0 16px;border:1px solid var(--gold);border-radius:14px;padding:12px;background:linear-gradient(180deg,var(--gold-bg),transparent)}
+  .easel.show{display:block}
+  .painters{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+  .painters button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;padding:9px 4px;border-radius:10px;border:1px solid var(--line-2);background:#fff;transition:.15s}
+  .painters button:hover{border-color:var(--gold)}
+  .painters button[aria-pressed=true]{background:var(--ink);border-color:var(--ink)}
+  .painters button[aria-pressed=true] b{color:var(--gold)}
+  .painters button[aria-pressed=true] span{color:oklch(75% 0.02 85)}
+  .painters b{font-size:.78rem;color:var(--ink)} .painters span{font-size:.62rem;color:var(--ink-3);font-weight:600}
+  /* inline translate bar */
+  .langbar{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 14px;padding:11px 12px;border:1px dashed var(--gold);border-radius:12px;background:var(--gold-bg)}
+  .langbar.show{display:flex}
+  .langbar .lb-t{font-size:.78rem;font-weight:800;color:var(--gold-d);margin-right:2px}
+  .langbar button{all:unset;cursor:pointer;font-size:.8rem;font-weight:700;color:var(--ink);background:#fff;border:1px solid var(--line-2);padding:6px 11px;border-radius:8px;transition:.14s}
+  .langbar button:hover{border-color:var(--gold-d);background:var(--gold-d);color:#fff}
+  .lb-status{font-size:.74rem;color:var(--ink-3);font-weight:600}
+  @media(max-width:560px){.painters{grid-template-columns:repeat(2,1fr)}.toolrail button{width:78px}}
   .navbtn{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;font-weight:600;font-size:.9rem;color:var(--ink-2);transition:.15s}
   .navbtn:hover{background:var(--gold-bg);color:var(--gold-d)}
   .navbtn.primary{background:var(--ink);color:#fff} .navbtn.primary:hover{background:var(--gold-d);color:#fff}
@@ -526,6 +538,24 @@
           <button data-svc="translate">🌐 Translate</button>
           <button data-svc="coach">💬 Get coaching</button>
         </div>
+        <div class="langbar" id="langbar">
+          <span class="lb-t">Translate to:</span>
+          <button data-lang="en">English</button><button data-lang="es">Spanish</button><button data-lang="fr">French</button><button data-lang="de">German</button><button data-lang="pt">Portuguese</button><button data-lang="it">Italian</button><button data-lang="zh-CN">Chinese</button><button data-lang="ja">Japanese</button><button data-lang="ko">Korean</button><button data-lang="ar">Arabic</button><button data-lang="hi">Hindi</button>
+          <span class="lb-status" id="langStatus"></span>
+        </div>
+        <div class="easel" id="easel">
+          <div class="painters" id="painters">
+            <button data-painter="instant"><b>⚡ Instant</b><span>in-browser</span></button>
+            <button data-painter="perchance"><b>🦄 Perchance</b><span>variety · free</span></button>
+            <button data-painter="chatgpt"><b>💬 ChatGPT</b><span>your account</span></button>
+            <button data-painter="bing"><b>🖼 Bing</b><span>Microsoft · free</span></button>
+          </div>
+          <div class="img-stage" id="imgStage"></div>
+          <div class="actions" style="margin-top:10px">
+            <button class="act primary" id="imgDownload">⬇ Download</button>
+            <button class="act ghost" id="imgRegen">🎲 Repaint</button>
+          </div>
+        </div>
         <div class="prose" id="prose"></div>
       </div>
     </section>
@@ -548,40 +578,6 @@
   </div>
 </div>
 <!-- Image generation modal -->
-<div class="modal" id="imgModal">
-  <div class="modal-card">
-    <button class="modal-x" id="imgClose" aria-label="Close">×</button>
-    <h3>🎨 Rocco's easel</h3>
-    <p style="margin:0 0 10px">Where shall he paint it?</p>
-    <div class="easelways">
-      <button id="wayHere"><b>⚡ Right here</b><span>free · in-browser</span></button>
-      <button id="wayGpt"><b>💬 My ChatGPT</b><span>your account paints it</span></button>
-      <button id="wayBing"><b>🖼 Bing Creator</b><span>free · Microsoft</span></button>
-    </div>
-    <div class="img-stage" id="imgStage"><div style="padding:18px;font-size:.86rem;color:var(--ink-3)">Pick a painter above — “Right here” shows it in this window.</div></div>
-    <div class="actions" style="justify-content:center;margin-top:14px">
-      <button class="act primary" id="imgDownload">⬇ Download</button>
-      <button class="act ghost" id="imgRegen">🎲 Repaint</button>
-    </div>
-    <p class="sp-note" style="padding:8px 4px 0">Generated free by Pollinations.ai from your polished prompt.</p>
-  </div>
-</div>
-<!-- Translate modal -->
-<div class="modal" id="transModal">
-  <div class="modal-card">
-    <button class="modal-x" id="transClose" aria-label="Close">×</button>
-    <h3>🌐 Translate the prompt</h3>
-    <p>Rocco speaks many tongues. Pick a language:</p>
-    <div class="share-url" style="margin-bottom:12px">
-      <select id="transLang" style="flex:1;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font-family:var(--sans);font-size:.9rem;background:var(--bg);color:var(--ink)">
-        <option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="pt">Portuguese</option><option value="it">Italian</option><option value="zh-CN">Chinese</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="ar">Arabic</option><option value="hi">Hindi</option>
-      </select>
-      <button id="transDo">Translate</button>
-    </div>
-    <div id="transStatus" style="font-size:.82rem;color:var(--ink-3);min-height:18px;margin-bottom:8px"></div>
-    <button class="share-native" id="transGoogle">Open in Google Translate instead</button>
-  </div>
-</div>
 <!-- Humanize modal -->
 <div class="modal" id="humModal">
   <div class="modal-card">
@@ -1212,6 +1208,7 @@ function start(){
   $$("[data-ctx]").forEach(el=>el.value="");
   state.qlist=buildQuestions(state.cats);
   $("#landing").style.display="none";$("#workspace").classList.add("show");$("#floatbar").style.display="flex";
+  $("#easel").classList.remove("show");$("#langbar").classList.remove("show");
   setMP("prompt");closeDrawer();
   renderQuestions();regenerate(true);
   if(state.settings.turbo&&state.settings.apiKey)turboGenerate();
@@ -1313,6 +1310,7 @@ function openWorkspaceBare(title,text,cat){
   state.cats=[cat];state.skills=[];state.qlist=[];state.answers={};state.versions=[];
   $("#lazy").value=state.task;
   $("#landing").style.display="none";$("#workspace").classList.add("show");$("#floatbar").style.display="flex";
+  $("#easel").classList.remove("show");$("#langbar").classList.remove("show");
   setMP("prompt");closeDrawer();renderQuestions();
   state.current={title,text,props:[{k:"Tool",v:cat}],skills:[]};
   renderRight(state.current);
@@ -1323,10 +1321,10 @@ function go(){
   if(!raw){toast("A little something to work with, sir?");return;}
   state.task=raw;
   if(state.tool==="humanize"){openWorkspaceBare("Humanized text",humanizeText(raw,"human"),"humanizer");toast("Warmed up 😊 — try other voices via 🪄");return;}
-  if(state.tool==="translate"){openWorkspaceBare("Translation",raw,"translator");$("#transStatus").textContent="";svcModal("#transModal",true);return;}
+  if(state.tool==="translate"){openWorkspaceBare("Translation",raw,"translator");showLangbar();return;}
   if(state.tool==="chat"){const tool=getPref()||"chatgpt";copyText(raw);window.open(toolUrl(tool,raw),"_blank","noopener");toast("Off to your AI — paste if it didn't prefill");return;}
   start(); // polish + image
-  if(state.tool==="image")svcModal("#imgModal",true);
+  if(state.tool==="image")showEasel(true);
 }
 $("#giddy").onclick=go;
 $("#task").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")go();});
@@ -1420,12 +1418,27 @@ function paint(){
   };
   im.src=imgUrl; im.alt="Generated image";
 }
-$("#imgRegen").onclick=paint;
-$("#wayHere").onclick=paint;
-$("#wayGpt").onclick=()=>{const p="Please generate an image: "+imgSeedPrompt();copyText(p);window.open("https://chatgpt.com/?q="+encodeURIComponent(p),"_blank","noopener");toast("ChatGPT is painting in your account 🎨");};
-$("#wayBing").onclick=()=>window.open("https://www.bing.com/images/create?q="+encodeURIComponent(imgSeedPrompt()),"_blank","noopener");
-$("#imgClose").onclick=()=>svcModal("#imgModal",false);
-$("#imgModal").onclick=e=>{if(e.target.id==="imgModal")svcModal("#imgModal",false);};
+/* painter hub — remembers the favorite, paints without popups */
+function getPainter(){try{return localStorage.getItem("pb_painter")||"instant";}catch(e){return "instant";}}
+function setPainter(p){try{localStorage.setItem("pb_painter",p);}catch(e){} $$("#painters button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.painter===p?"true":"false"));}
+function stageNote(html){$("#imgStage").innerHTML='<div style="padding:20px 14px;text-align:center;font-size:.86rem;color:var(--ink-2);line-height:1.55">'+html+'</div>';}
+function showEasel(autopaint){
+  $("#easel").classList.add("show");
+  const p=getPainter();setPainter(p);
+  if(autopaint)paintWith(p);
+  $("#easel").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function paintWith(p){
+  setPainter(p);
+  const seedP=imgSeedPrompt();
+  if(p==="instant"){paint();return;}
+  copyText(seedP);
+  if(p==="perchance"){window.open("https://perchance.org/ai-text-to-image-generator","_blank","noopener");stageNote("🦄 <b>Perchance is open in a new tab</b> — lovely variety over there.<br>Your prompt is already copied: paste it in and generate.");}
+  else if(p==="chatgpt"){window.open("https://chatgpt.com/?q="+encodeURIComponent("Please generate an image: "+seedP),"_blank","noopener");stageNote("💬 <b>ChatGPT is painting in your account.</b><br>If it logged you out again, no worries — your prompt is copied, just paste.");}
+  else if(p==="bing"){window.open("https://www.bing.com/images/create?q="+encodeURIComponent(seedP),"_blank","noopener");stageNote("🖼 <b>Bing Image Creator is open</b> with your prompt — free with a Microsoft account.");}
+}
+$$("#painters button").forEach(b=>b.onclick=()=>paintWith(b.dataset.painter));
+$("#imgRegen").onclick=()=>paintWith(getPainter());
 $("#imgDownload").onclick=async()=>{
   if(!imgUrl)return;
   try{const r=await fetch(imgUrl);const b=await r.blob();const u=URL.createObjectURL(b);
@@ -1446,7 +1459,7 @@ async function translateText(text,target){
   if(buf)chunks.push(buf);
   const out=[];
   for(let i=0;i<chunks.length;i++){
-    $("#transStatus").textContent="Translating… "+(i+1)+"/"+chunks.length;
+    $("#langStatus").textContent="Translating… "+(i+1)+"/"+chunks.length;
     const res=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(chunks[i])+"&langpair=autodetect|"+encodeURIComponent(target));
     if(!res.ok)throw new Error("HTTP "+res.status);
     const data=await res.json();
@@ -1456,23 +1469,23 @@ async function translateText(text,target){
   }
   const joined=out.join("\n");transCache[key]=joined;return joined;
 }
-$("#transDo").onclick=async()=>{
+/* inline language bar — pick a language, it just translates */
+function showLangbar(){$("#langbar").classList.add("show");$("#langbar").scrollIntoView({behavior:"smooth",block:"nearest"});}
+$$("#langbar button[data-lang]").forEach(b=>b.onclick=async()=>{
   const text=currentText();if(!text)return;
-  const target=$("#transLang").value;
-  document.body.classList.add("working");
+  const target=b.dataset.lang;
+  document.body.classList.add("working");$("#langStatus").textContent="Translating…";
   try{
     const t=await translateText(text,target);
-    setPromptText(t,$("#transLang").selectedOptions[0].textContent);
-    $("#transStatus").textContent="";svcModal("#transModal",false);toast("Translated, sir 🌐");
-  }catch(e){$("#transStatus").textContent="Hmm — that route failed ("+e.message+"). Try Google Translate below.";}
+    setPromptText(t,b.textContent);
+    $("#langStatus").textContent="";$("#langbar").classList.remove("show");toast("Translated, sir 🌐");
+  }catch(e){
+    $("#langStatus").textContent="";
+    toast("Free translator hiccuped — opening Google Translate");
+    window.open("https://translate.google.com/?sl=auto&tl="+target.split("-")[0]+"&text="+encodeURIComponent(text)+"&op=translate","_blank","noopener");
+  }
   document.body.classList.remove("working");
-};
-$("#transGoogle").onclick=()=>{
-  const target=$("#transLang").value.split("-")[0];
-  window.open("https://translate.google.com/?sl=auto&tl="+target+"&text="+encodeURIComponent(currentText())+"&op=translate","_blank","noopener");
-};
-$("#transClose").onclick=()=>svcModal("#transModal",false);
-$("#transModal").onclick=e=>{if(e.target.id==="transModal")svcModal("#transModal",false);};
+});
 
 /* ── 3. Humanizer / tone (local, instant) ── */
 const HUM_SWAPS=[[/\butilize\b/gi,"use"],[/\bleverage\b/gi,"use"],[/\bcommence\b/gi,"start"],[/\bendeavor\b/gi,"try"],[/\bfacilitate\b/gi,"help"],[/\bsubsequently\b/gi,"then"],[/\bin order to\b/gi,"to"],[/\bprior to\b/gi,"before"],[/\butilization\b/gi,"use"],[/\boptimal\b/gi,"best"],[/\bnumerous\b/gi,"many"],[/\bpurchase\b/gi,"buy"]];
@@ -1517,8 +1530,8 @@ function coach(){
 $$("#services button[data-svc]").forEach(b=>b.onclick=()=>{
   const s=b.dataset.svc;
   if(!currentText()){toast("Polish a prompt first, sir");return;}
-  if(s==="image"){svcModal("#imgModal",true);}
-  else if(s==="translate"){$("#transStatus").textContent="";svcModal("#transModal",true);}
+  if(s==="image"){showEasel(true);}
+  else if(s==="translate"){$("#langbar").classList.toggle("show");if($("#langbar").classList.contains("show"))$("#langbar").scrollIntoView({behavior:"smooth",block:"nearest"});}
   else if(s==="humanize"){svcModal("#humModal",true);}
   else if(s==="coach"){coach();}
 });
@@ -1579,7 +1592,7 @@ $("#newBtn").onclick=()=>{
   state.task="";state.answers={};state.versions=[];state.current=null;state.cats=[];state.skills=[];
   state.context={background:"",audience:"",constraints:"",examples:""};state.attachments=[];renderAttachments();
   $$("[data-ctx]").forEach(el=>el.value="");$("#lazy").value="";
-  $("#workspace").classList.remove("show");$("#floatbar").style.display="none";$("#landing").style.display="flex";
+  $("#workspace").classList.remove("show");$("#floatbar").style.display="none";$("#landing").style.display="block";
   $("#task").value="";$("#task").focus();$("#crumbTitle").textContent="New Prompt";closeDrawer();
 };
 /* ── Share the app (Rocco popup) ── */
@@ -1623,6 +1636,7 @@ function loadSaved(item){
   $$("[data-ctx]").forEach(el=>el.value=state.context[el.dataset.ctx]||"");
   $$("[data-set]").forEach(el=>{const k=el.dataset.set;if(el.type==="checkbox")el.checked=!!state.settings[k];else if(state.settings[k]!==undefined)el.value=state.settings[k];});
   $("#landing").style.display="none";$("#workspace").classList.add("show");$("#floatbar").style.display="flex";
+  $("#easel").classList.remove("show");$("#langbar").classList.remove("show");
   renderQuestions();regenerate(true);switchTab("inputs");syncSettingsUI();setMP("prompt");closeDrawer();
 }
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
