@@ -77,15 +77,64 @@
   .tbtn{all:unset;cursor:pointer;font-weight:700;font-size:.82rem;padding:9px 15px;border-radius:9px;transition:.15s}
   .tbtn.ghost{border:1px solid var(--line-2);color:var(--ink-2)} .tbtn.ghost:hover{border-color:var(--gold);color:var(--gold-d)}
   .tbtn.solid{background:var(--ink);color:#fff} .tbtn.solid:hover{background:var(--gold-d)}
-  .landing{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px}
-  .landing h1{font-family:var(--serif);font-size:clamp(2rem,1rem+3.6vw,3.3rem);margin:0 0 10px;letter-spacing:-.01em;font-style:italic}
+  .landing{flex:1;display:block;overflow-y:auto;text-align:center;scroll-behavior:smooth}
+  .hero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;max-width:780px;margin:0 auto;padding:38px 20px 52px}
+  .hero-glow{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:min(560px,92vw);height:420px;background:radial-gradient(50% 50% at 50% 38%, var(--gold-bg), transparent 72%);filter:blur(6px);z-index:0;pointer-events:none}
+  .hero>*:not(.hero-glow){position:relative;z-index:1}
+  .trustline{font-size:.75rem;font-weight:700;letter-spacing:.01em;color:var(--gold-d);background:var(--gold-bg);border:1px solid var(--gold);padding:6px 14px;border-radius:999px;margin-bottom:14px}
+  .landing h1{font-family:var(--serif);font-size:clamp(2.1rem,1rem+4vw,3.5rem);margin:0 0 10px;letter-spacing:-.01em;font-style:italic;line-height:1.04}
   .landing h1 .em{color:var(--gold-d);font-style:normal}
-  .landing p.sub{color:var(--ink-2);font-size:1.08rem;max-width:48ch;margin:0 0 26px}
+  .landing p.sub{color:var(--ink-2);font-size:1.08rem;max-width:50ch;margin:0 auto 24px}
+  .herolinks{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:28px}
+  .herolinks a{font-size:.82rem;font-weight:700;color:var(--ink-2);text-decoration:none;padding:8px 15px;border-radius:999px;border:1px solid var(--line);transition:.15s}
+  .herolinks a:hover{border-color:var(--gold);color:var(--gold-d);background:var(--gold-bg)}
+  /* premium portal sections */
+  .psec{max-width:1000px;margin:0 auto;padding:60px 22px;border-top:1px solid var(--line)}
+  .psec.alt{max-width:none;background:linear-gradient(180deg, oklch(96% 0.025 85/.55), transparent 80%)}
+  .psec.alt>*{max-width:1000px;margin-left:auto;margin-right:auto}
+  .psec-head{text-align:center;margin-bottom:34px}
+  .psec-head h2{font-family:var(--serif);font-size:clamp(1.6rem,1rem+2.2vw,2.3rem);margin:0 0 8px;letter-spacing:-.01em}
+  .psec-head p{color:var(--ink-2);font-size:1rem;margin:0}
+  .tpl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:16px}
+  .tplcard{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:6px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;transition:.18s var(--ease);box-shadow:0 1px 2px oklch(40% 0.03 265/.04)}
+  .tplcard:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 22px 42px -24px oklch(45% 0.1 55/.5)}
+  .tplcard .t-ic{font-size:1.7rem}
+  .tplcard .t-ti{font-family:var(--serif);font-weight:700;font-size:1.12rem}
+  .tplcard .t-bl{font-size:.85rem;color:var(--ink-2);line-height:1.45}
+  .steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px}
+  .step3{padding:8px 6px}
+  .step3 .s-n{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:var(--ink);color:var(--gold);font-family:var(--serif);font-weight:800;font-size:1.3rem;margin:0 auto 14px;box-shadow:0 6px 0 oklch(18% 0.01 265)}
+  .step3 h3{font-family:var(--serif);font-size:1.2rem;margin:0 0 6px}
+  .step3 p{color:var(--ink-2);font-size:.92rem;margin:0 auto;max-width:30ch}
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .featcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:left;transition:.18s var(--ease)}
+  .featcard:hover{transform:translateY(-3px);box-shadow:0 18px 36px -24px oklch(40% 0.06 60/.45)}
+  .featcard .f-ic{font-size:1.6rem;display:block;margin-bottom:10px}
+  .featcard h3{font-family:var(--serif);font-size:1.16rem;margin:0 0 6px}
+  .featcard p{color:var(--ink-2);font-size:.9rem;margin:0;line-height:1.5}
+  .proofstrip{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:40px}
+  .proofstrip .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 26px;min-width:118px}
+  .proofstrip .st-n{display:block;font-family:var(--serif);font-weight:800;font-size:1.9rem;color:var(--gold-d);line-height:1}
+  .proofstrip .st-l{font-size:.74rem;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+  .faq-list{max-width:680px;margin:0 auto;text-align:left}
+  .faq-i{border:1px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:10px;overflow:hidden}
+  .faq-i summary{cursor:pointer;list-style:none;padding:16px 18px;font-weight:700;font-size:.98rem;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .faq-i summary::-webkit-details-marker{display:none}
+  .faq-i summary::after{content:"+";font-size:1.4rem;color:var(--gold-d);font-weight:400;transition:.2s;line-height:1}
+  .faq-i[open] summary::after{transform:rotate(45deg)}
+  .faq-i>div{padding:0 18px 16px;color:var(--ink-2);font-size:.92rem;line-height:1.55}
+  .pfoot{display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap;padding:34px 22px calc(42px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:linear-gradient(180deg,transparent,var(--gold-bg))}
+  .pfoot-rocco{width:62px;height:62px;object-fit:contain;border-radius:14px}
+  .pfoot-mid{text-align:left}
+  .pfoot-name{font-family:var(--serif);font-weight:800;font-size:1.08rem}
+  .pfoot-tag{font-size:.84rem;color:var(--ink-2);font-style:italic}
+  .pfoot-share{all:unset;cursor:pointer;font-weight:700;font-size:.86rem;color:#fff;background:var(--ink);padding:11px 18px;border-radius:11px;transition:.15s}
+  .pfoot-share:hover{background:var(--gold-d)}
   .entry{width:min(700px,92vw)}
   .seg{display:inline-flex;background:#fff;border:1px solid var(--line-2);border-radius:11px;padding:4px;gap:3px;margin-bottom:14px}
   .seg button{all:unset;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--ink-2);padding:8px 16px;border-radius:8px;transition:.18s}
   .seg button[aria-pressed=true]{background:var(--ink);color:#fff}
-  .entry textarea{width:100%;min-height:120px;resize:vertical;border:2px solid var(--line-2);border-radius:13px;padding:15px;font-family:var(--sans);font-size:1.06rem;background:#fff;color:var(--ink);transition:.2s}
+  .entry textarea{width:100%;min-height:120px;resize:vertical;border:2px solid var(--line-2);border-radius:16px;padding:16px;font-family:var(--sans);font-size:1.06rem;background:#fff;color:var(--ink);transition:.2s;box-shadow:0 14px 34px -20px oklch(45% 0.06 60/.45)}
   .entry textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 4px oklch(64% 0.11 80/.16)}
   .examples{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:14px 0}
   .chip-ex{cursor:pointer;font-size:.78rem;font-weight:600;color:var(--gold-d);background:var(--gold-bg);border:1px dashed var(--gold);padding:6px 11px;border-radius:8px;transition:.16s}
@@ -240,11 +289,16 @@
     textarea,input,select,#lazy,.qfree,.qopt,.entry textarea,.ctxfield textarea,.ctxfield input,.setrow select,.setrow input{font-size:16px}
     .qopt{padding:10px 13px}
     .mascot{height:140px}.roccoimg{height:140px}
-    .landing{justify-content:flex-start;padding:18px 16px calc(40px + env(safe-area-inset-bottom));overflow-y:auto}
+    .landing{padding:0;overflow-y:auto}
+    .hero{min-height:auto;padding:18px 16px 38px}
     .entry{width:100%}
     .landing h1{font-size:1.9rem}
     .examples{margin:12px 0 16px}
     .giddy{width:100%;text-align:center;padding:16px}
+    .psec{padding:44px 16px}
+    .pfoot{flex-direction:column;text-align:center}
+    .pfoot-mid{text-align:center}
+    .trustline{white-space:normal;max-width:94vw;border-radius:14px;font-size:.7rem;line-height:1.45;text-align:center}
   }
 </style>
 </head>
@@ -271,24 +325,94 @@
     </div>
 
     <section class="landing" id="landing">
-      <div class="mascot" id="mascotCoon"></div>
-      <h1>Allow me to <span class="em">refine that</span>.</h1>
-      <p class="sub">Hand me a rough idea, and I shall return an exhaustively detailed prompt — portable to ChatGPT, Claude & Gemini, with your finest skills laid out.</p>
-      <div class="entry">
-        <textarea id="task" placeholder="Your rough request, sir…  e.g. “write a cold email a busy CEO will actually answer”"></textarea>
-        <div class="examples" id="examples"></div>
-        <div class="attachrow"><button class="attachbtn" id="attachLanding" type="button">📎 Attach files or images</button></div>
-        <div class="attachchips" id="attachChipsLanding"></div>
-        <button class="giddy" id="giddy">Upgrade Prompt&nbsp;→</button>
-        <div class="quicksend">
-          <span class="qs-label">…or upgrade &amp; send straight to</span>
-          <div class="qs-tools">
-            <button data-qs="chatgpt"><span class="ic gpt"></span>ChatGPT</button>
-            <button data-qs="claude"><span class="ic cla"></span>Claude</button>
-            <button data-qs="gemini"><span class="ic gem"></span>Gemini</button>
+      <div class="hero">
+        <div class="hero-glow"></div>
+        <div class="mascot" id="mascotCoon"></div>
+        <div class="trustline">179 skills · free · no login · works with ChatGPT, Claude &amp; Gemini</div>
+        <h1>Allow me to <span class="em">refine that</span>.</h1>
+        <p class="sub">Hand me a rough idea, and I shall return an exhaustively detailed prompt — for tasks, workflows, or image generation — portable to ChatGPT, Claude &amp; Gemini.</p>
+        <div class="entry">
+          <textarea id="task" placeholder="Your rough request, sir…  e.g. “write a cold email a busy CEO will actually answer”"></textarea>
+          <div class="examples" id="examples"></div>
+          <div class="attachrow"><button class="attachbtn" id="attachLanding" type="button">📎 Attach files or images</button></div>
+          <div class="attachchips" id="attachChipsLanding"></div>
+          <button class="giddy" id="giddy">Upgrade Prompt&nbsp;→</button>
+          <div class="quicksend">
+            <span class="qs-label">…or upgrade &amp; send straight to</span>
+            <div class="qs-tools">
+              <button data-qs="chatgpt"><span class="ic gpt"></span>ChatGPT</button>
+              <button data-qs="claude"><span class="ic cla"></span>Claude</button>
+              <button data-qs="gemini"><span class="ic gem"></span>Gemini</button>
+            </div>
           </div>
         </div>
+        <nav class="herolinks">
+          <a href="#templates">Templates</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#faq">FAQ</a>
+        </nav>
       </div>
+
+      <!-- Template gallery -->
+      <section class="psec" id="templates">
+        <div class="psec-head"><h2>What can Rocco wrangle?</h2><p>Pick a starting point — he'll tailor the prompt, you tweak and send.</p></div>
+        <div class="tpl-grid" id="tplGrid">
+          <button class="tplcard" data-tpl="Write a warm follow-up email to a client who hasn't replied in two weeks"><span class="t-ic">📋</span><span class="t-ti">Tasks</span><span class="t-bl">Emails, replies, summaries, to-dos — done sharper.</span></button>
+          <button class="tplcard" data-tpl="Design a 5-step onboarding workflow for a new SaaS customer, with automated emails and check-ins"><span class="t-ic">🔄</span><span class="t-ti">Workflows</span><span class="t-bl">Multi-step processes and automations, mapped out.</span></button>
+          <button class="tplcard" data-tpl="Generate an image of a cozy mountain cabin at golden hour, cinematic, ultra detailed"><span class="t-ic">🎨</span><span class="t-ti">Image generation</span><span class="t-bl">Midjourney, DALL·E, Stable Diffusion, GIF & video.</span></button>
+          <button class="tplcard" data-tpl="Write a punchy product description for a premium single-origin coffee subscription"><span class="t-ic">✍️</span><span class="t-ti">Writing</span><span class="t-bl">Copy, articles, scripts, posts — with real voice.</span></button>
+          <button class="tplcard" data-tpl="Build a responsive 3-tier pricing page in React with Tailwind and a monthly/annual toggle"><span class="t-ic">💻</span><span class="t-ti">Code</span><span class="t-bl">Features, fixes, reviews — with your stack in mind.</span></button>
+          <button class="tplcard" data-tpl="Analyze my Q3 sales numbers and summarize the top three trends with recommendations"><span class="t-ic">📊</span><span class="t-ti">Business</span><span class="t-bl">Analysis, reports, plans across finance, sales & ops.</span></button>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="psec alt" id="how">
+        <div class="psec-head"><h2>Three taps to a prize-winning prompt</h2></div>
+        <div class="steps3">
+          <div class="step3"><span class="s-n">1</span><h3>Describe it</h3><p>Type a rough idea — half a sentence is plenty. Attach files or images for extra context.</p></div>
+          <div class="step3"><span class="s-n">2</span><h3>Rocco refines</h3><p>He routes the right skills and offers a few sharpening questions for an exhaustively detailed prompt.</p></div>
+          <div class="step3"><span class="s-n">3</span><h3>Send to your AI</h3><p>Copy it, or fire it straight into ChatGPT, Claude, or Gemini — in your own logged-in account.</p></div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="psec" id="features">
+        <div class="psec-head"><h2>Why Prompt Butler</h2><p>The premium way to craft prompts that actually work.</p></div>
+        <div class="feat-grid">
+          <div class="featcard"><span class="f-ic">🧠</span><h3>Skill-aware</h3><p>179 built-in skills mapped to your task and woven in for sharper, deeper results.</p></div>
+          <div class="featcard"><span class="f-ic">🎨</span><h3>Image &amp; GIF mode</h3><p>Tailored prompts for Midjourney, DALL·E, Stable Diffusion, Sora — with negative prompts &amp; settings.</p></div>
+          <div class="featcard"><span class="f-ic">📎</span><h3>Attach context</h3><p>Drop in files or images and Rocco grounds the prompt in your real material.</p></div>
+          <div class="featcard"><span class="f-ic">🔗</span><h3>Portable to any AI</h3><p>One-click open in ChatGPT, Claude, or Gemini — it remembers your favorite.</p></div>
+          <div class="featcard"><span class="f-ic">🕘</span><h3>Version history</h3><p>Every refinement is saved. Jump back to any version, anytime.</p></div>
+          <div class="featcard"><span class="f-ic">🆓</span><h3>Free &amp; private</h3><p>No login, no API key. Everything runs in your browser and stays on your device.</p></div>
+        </div>
+      </section>
+
+      <!-- Social proof + FAQ -->
+      <section class="psec alt" id="faq">
+        <div class="proofstrip">
+          <div class="stat"><span class="st-n">179</span><span class="st-l">skills</span></div>
+          <div class="stat"><span class="st-n">4</span><span class="st-l">prompt formats</span></div>
+          <div class="stat"><span class="st-n">6</span><span class="st-l">image tools</span></div>
+          <div class="stat"><span class="st-n">$0</span><span class="st-l">forever</span></div>
+        </div>
+        <div class="psec-head"><h2>Questions?</h2></div>
+        <div class="faq-list">
+          <details class="faq-i"><summary>Is it really free?</summary><div>Yes — Prompt Butler runs entirely in your browser. No login and no API key required. An optional Turbo mode can use your <em>own</em> Anthropic key for AI-rewritten prompts, but everything works beautifully without it.</div></details>
+          <details class="faq-i"><summary>Does it work with ChatGPT, Claude, and Gemini?</summary><div>Yes. Every prompt is portable to any AI, and you can open it directly in ChatGPT, Claude, or Gemini in one click — using your existing logged-in account.</div></details>
+          <details class="faq-i"><summary>What does “skill-aware” mean?</summary><div>Rocco maps your request against 179 built-in skills and weaves the most relevant ones into the prompt — so you get the depth of an expert, not a generic template.</div></details>
+          <details class="faq-i"><summary>Can it make image &amp; video prompts?</summary><div>Absolutely. Image mode produces tailored prompts for Midjourney, DALL·E, Stable Diffusion, Google Imagen, and Sora/GIF — complete with negative prompts and recommended settings.</div></details>
+          <details class="faq-i"><summary>Where is my data stored?</summary><div>Only in your browser (localStorage). Nothing is uploaded. Your saved prompts and preferences never leave your device.</div></details>
+        </div>
+      </section>
+
+      <footer class="pfoot">
+        <img src="rocco.png" alt="Rocco" class="pfoot-rocco">
+        <div class="pfoot-mid">
+          <div class="pfoot-name">Prompt Butler 🦝</div>
+          <div class="pfoot-tag">Allow me to refine that, sir.</div>
+        </div>
+        <button class="pfoot-share" id="footShare">⤴ Share Rocco with a friend</button>
+      </footer>
     </section>
 
     <section class="workspace" id="workspace">
@@ -1118,6 +1242,14 @@ $$(".qs-tools button[data-qs]").forEach(b=>b.onclick=()=>{
   start();
   openInTool(b.dataset.qs);
 });
+/* template gallery → prefill the input and jump to it */
+$$("#tplGrid .tplcard").forEach(c=>c.onclick=()=>{
+  $("#task").value=c.dataset.tpl||"";
+  $("#landing").scrollTo({top:0,behavior:"smooth"});
+  setTimeout(()=>{$("#task").focus();},300);
+  toast("Loaded — tweak it, then Upgrade");
+});
+$("#footShare").onclick=openShare;
 markPref();
 /* mobile: slide-in drawer + Inputs/Prompt pane toggle */
 function closeDrawer(){$(".app").classList.remove("drawer");}
